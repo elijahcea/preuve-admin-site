@@ -5,9 +5,9 @@
 
 <template>
   <HeaderComponent />
-  <div class="flex">
+  <div class="flex h-full">
     <NavBar />
-    <main class="grow p-2">
+    <main class="grow p-2 bg-gray-100">
       <RouterView />
     </main>
   </div>

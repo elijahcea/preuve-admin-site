@@ -1,25 +1,35 @@
 <script setup lang="ts">
-import { ShoppingBagIcon, TagIcon, SwatchIcon } from "@heroicons/vue/24/outline";
+import { ShoppingBagIcon, TagIcon, SwatchIcon, HomeIcon } from "@heroicons/vue/24/outline";
 
 const iconSize = "size-5";
-const itemStyles = "flex items-center gap-2 hover:bg-current/20"
+const itemStyles = "flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounded-xl"
 </script>
 
 <template>
-    <nav class="p-2 bg-gray-50">
+    <nav class="p-3 bg-gray-200 inset-shadow-sm font-semibold">
         <ul>
-            <li :class="itemStyles">
+            <RouterLink to="/" :class="itemStyles">
+                <HomeIcon :class="iconSize"></HomeIcon>
+                <p>Home</p>
+            </RouterLink>
+            <RouterLink to="/products" :class="itemStyles">
                 <ShoppingBagIcon :class="iconSize"></ShoppingBagIcon>
                 <p>Products</p>
-            </li>
-            <li :class="itemStyles">
+            </RouterLink>
+            <RouterLink to="/collections" :class="itemStyles">
                 <TagIcon :class="iconSize"></TagIcon>
                 <p>Collections</p>
-            </li>
-            <li :class="itemStyles">
+            </RouterLink>
+            <RouterLink to="/options" :class="itemStyles">
                 <SwatchIcon :class="iconSize"></SwatchIcon>
                 <p>Options</p>
-            </li>
+            </RouterLink>
         </ul>
     </nav>
 </template>
+
+<style scoped>
+.router-link-exact-active {
+  background-color: var(--background);
+}
+</style>
