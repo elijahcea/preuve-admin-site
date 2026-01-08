@@ -14,6 +14,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2))
+      ag-grid-vue3:
+        specifier: ^35.0.0
+        version: 35.0.0(vue@3.5.26(typescript@5.9.3))
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -880,6 +883,17 @@ packages:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  ag-charts-types@13.0.0:
+    resolution: {integrity: sha512-mqOmKS0q4s2tt/C+CBG2Z+HWrSKYvRUCAlQzcKXKfARE3v/KdnBuxfjafa2c8ivElTTywdVdOe0q52Cow2Oggw==}
+
+  ag-grid-community@35.0.0:
+    resolution: {integrity: sha512-Cz3MA98zZygPwvCi8OKIhP0nea+YXdx8r5MwIXqVqnQwb/BEL05nGxwovIpelL6spv3jNlHQrTVgt4lw9J+nyg==}
+
+  ag-grid-vue3@35.0.0:
+    resolution: {integrity: sha512-R4Y/Ru6Pjwjgw6hWBsm61cav5s/QskkSrwN1uoEeJVWVBM/JggZtDFGo9OhlCocwjn5O8KSFgA+TVnw6iplaSQ==}
+    peerDependencies:
+      vue: ^3.5.0
 
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
@@ -2592,6 +2606,17 @@ snapshots:
       acorn: 8.15.0
 
   acorn@8.15.0: {}
+
+  ag-charts-types@13.0.0: {}
+
+  ag-grid-community@35.0.0:
+    dependencies:
+      ag-charts-types: 13.0.0
+
+  ag-grid-vue3@35.0.0(vue@3.5.26(typescript@5.9.3)):
+    dependencies:
+      ag-grid-community: 35.0.0
+      vue: 3.5.26(typescript@5.9.3)
 
   ajv@6.12.6:
     dependencies:
