@@ -2,7 +2,7 @@
 import TableComponent from '@/components/TableComponent.vue';
 import CheckboxComponent from '@/components/CheckboxComponent.vue';
 import { useVueTable, createColumnHelper, getCoreRowModel, getSortedRowModel, type RowSelectionState } from '@tanstack/vue-table';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 type Product = {
     id: string;
@@ -11,6 +11,10 @@ type Product = {
 }
 
 const rowSelection = ref<RowSelectionState>({});
+const selectedRowId = computed(() => {
+    const keys = Object.keys(rowSelection.value);
+    return keys.length === 1 ? keys[0] : undefined;
+});
 
 const columnHelper = createColumnHelper<Product>();
 
@@ -82,7 +86,16 @@ const table = useVueTable({
 
 <template>
     <div class="flex flex-col align-start gap-3">
-        <h1 class="text-xl font-bold">Products</h1>
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-bold">Products</h1>
+            <component
+                :is="selectedRowId ? 'RouterLink' : 'span'"
+                :class="'font-bold rounded p-2 bg-blue-400 ' + `${selectedRowId ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`"
+                :to="`/products/edit?p=${selectedRowId}`"
+            >
+                Modify
+            </component>
+        </div>
         <TableComponent :table="table" />
     </div>
 </template>
