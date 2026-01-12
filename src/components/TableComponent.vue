@@ -1,7 +1,9 @@
 <script setup lang="ts" generic="T">
 import { type Table, FlexRender } from '@tanstack/vue-table';
+
 const props = defineProps<{ table: Table<T> }>();
 const table = props.table;
+
 </script>
 
 <template>
