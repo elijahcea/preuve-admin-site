@@ -1,6 +1,7 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import TableComponent from '@/components/TableComponent.vue';
-import { useVueTable, createColumnHelper, getCoreRowModel, getSortedRowModel } from '@tanstack/vue-table';
+import CheckboxComponent from '@/components/CheckboxComponent.vue';
+import { useVueTable, createColumnHelper, getCoreRowModel, getSortedRowModel, type RowSelectionState } from '@tanstack/vue-table';
 import { ref } from 'vue';
 
 type Product = {
@@ -9,11 +10,27 @@ type Product = {
     price: number
 }
 
+const rowSelection = ref<RowSelectionState>({});
+
 const columnHelper = createColumnHelper<Product>();
 
 const columns = [
     columnHelper.display({
-        id: "select",
+        id: "select-col",
+        header: ({ table }) => (
+            <CheckboxComponent
+                checked={table.getIsAllRowsSelected()}
+                intederminate={table.getIsSomeRowsSelected()}
+                onChange={table.getToggleAllRowsSelectedHandler()}
+            ></CheckboxComponent>
+        ),
+        cell: ({ row }) => (
+            <CheckboxComponent
+                checked={row.getIsSelected()}
+                disabled={!row.getCanSelect()}
+                onChange={row.getToggleSelectedHandler()}
+            ></CheckboxComponent>
+        )
     }),
     columnHelper.accessor("name", {
         header: "Product",
@@ -45,6 +62,19 @@ const data = ref<Product[]>([
 const table = useVueTable({ 
     columns,
     data,
+    state: {
+        get rowSelection() {
+            return rowSelection.value;
+        }
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: (updateOrValue) => {
+        rowSelection.value =
+            typeof updateOrValue === 'function'
+                ? updateOrValue(rowSelection.value)
+                : updateOrValue
+    },
+    getRowId: row => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel()
 });
