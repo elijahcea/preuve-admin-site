@@ -35,7 +35,7 @@ const table = props.table;
                 <td
                     v-for="cell in row.getVisibleCells()"
                     :key="cell.id"
-                    class="font-bold border-t border-t-gray-200 p-2"
+                    :class="`font-bold border-t border-t-gray-200 p-2 ` + `${row.getIsSelected() ? `bg-blue-300/50` : ``}`"
                 >
                     <FlexRender
                         :render="cell.column.columnDef.cell"
