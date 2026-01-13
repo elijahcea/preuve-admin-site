@@ -12,7 +12,7 @@ const router = createRouter({
     { path: "/products",
       children: [
         { path: "", component: ProductsView },
-        { path: "modify/:id", component: ModifyProductView, props: true }
+        { path: "modify/:id", name: "modifyProduct" , component: ModifyProductView, props: true }
       ]
     },
     { path: "/collections", component: CollectionsView },
