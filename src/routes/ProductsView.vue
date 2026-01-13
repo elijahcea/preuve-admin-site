@@ -91,7 +91,7 @@ const table = useVueTable({
             <component
                 :is="selectedRowId ? 'RouterLink' : 'span'"
                 :class="'font-bold rounded p-2 bg-blue-400 ' + `${selectedRowId ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`"
-                :to="`/products/edit?p=${selectedRowId}`"
+                :to="`/products/modify/${selectedRowId}`"
             >
                 Modify
             </component>
