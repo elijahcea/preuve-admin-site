@@ -1,4 +1,5 @@
 export const currencyInfo = {
     locale: "en-US",
-    currency: "USD"
+    currency: "USD",
+    symbol: "$"
 }
