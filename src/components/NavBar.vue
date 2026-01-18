@@ -29,7 +29,7 @@ const itemStyles = "flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounde
 </template>
 
 <style scoped>
-.router-link-exact-active {
+.router-link-active {
   background-color: var(--background);
 }
 </style>
