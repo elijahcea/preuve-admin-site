@@ -82,22 +82,32 @@ const table = useVueTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel()
 });
+
+const isSomeRowsSelected = computed(() => Boolean(Object.keys(rowSelection.value).length));
 </script>
 
 <template>
     <div class="flex flex-col align-start gap-3">
         <div class="flex items-center justify-between">
             <h1 class="text-xl font-bold">Products</h1>
-            <component
-                :is="selectedRowId ? 'RouterLink' : 'span'"
-                :class="'font-bold rounded p-2 bg-blue-400 ' + `${selectedRowId ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`"
-                :to="{
-                    name: 'modifyProduct',
-                    params: { id: selectedRowId }
-                }"
-            >
-                Modify
-            </component>
+            <div class="flex gap-3">
+                <component
+                    :is="selectedRowId ? 'RouterLink' : 'span'"
+                    :class="'font-bold rounded p-2 bg-blue-400 ' + `${selectedRowId ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`"
+                    :to="{
+                        name: 'productDetails',
+                        params: { id: selectedRowId }
+                    }"
+                >
+                    Modify
+                </component>
+                <component
+                    :is="isSomeRowsSelected ? 'button' : 'span'"
+                    :class="'font-bold rounded p-2 bg-red-400 ' + `${isSomeRowsSelected ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`"
+                >
+                    Delete
+                </component>
+            </div>
         </div>
         <TableComponent :table="table" />
     </div>
