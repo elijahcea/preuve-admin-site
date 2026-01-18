@@ -7,7 +7,7 @@
   <HeaderComponent />
   <div class="flex h-full">
     <NavBar />
-    <main class="grow p-2 bg-gray-200">
+    <main class="grow py-3 bg-gray-200">
       <RouterView />
     </main>
   </div>
