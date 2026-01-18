@@ -17,6 +17,7 @@ export type ProductVariant = {
   image?: Image;
   href: string;
   selectedOptions: SelectedOption[];
+  quantity: number;
 };
 
 export type Product = {
@@ -44,3 +45,9 @@ export type Image = {
   width?: number;
   height?: number;
 };
+
+export type Collection = {
+  id: string;
+  name: string;
+  description: string;
+}
