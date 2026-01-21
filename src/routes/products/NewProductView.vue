@@ -153,7 +153,7 @@ const { symbol } = currencyInfo
       </fieldset>
       <fieldset class="bg-background rounded shadow-lg p-3">
         <Listbox v-model="productStatus" name="product-status">
-          <ListboxLabel class="font-semibold">Product status</ListboxLabel>
+          <ListboxLabel class="font-semibold"> Product status </ListboxLabel>
           <ListboxButton
             class="relative border border-gray-300 rounded p-2 w-full flex items-center justify-between my-1"
           >
