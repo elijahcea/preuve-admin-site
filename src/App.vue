@@ -1,13 +1,13 @@
 <script setup lang="ts">
-  import HeaderComponent from './components/HeaderComponent.vue';
-  import NavBar from './components/NavBar.vue';
+import HeaderComponent from './components/HeaderComponent.vue'
+import NavBar from './components/NavBar.vue'
 </script>
 
 <template>
   <HeaderComponent />
-  <div class="flex h-full">
+  <div class="flex h-full text-sm">
     <NavBar />
-    <main class="grow py-3 bg-gray-200">
+    <main class="grow p-3 bg-gray-100">
       <RouterView />
     </main>
   </div>
