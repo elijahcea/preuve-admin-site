@@ -9,12 +9,21 @@ import {
   type RowSelectionState,
 } from '@tanstack/vue-table'
 import { computed, ref } from 'vue'
+import { type CollectionPreview } from '@/lib/types'
+import { useQuery } from '@tanstack/vue-query'
+import { fetchCollections } from '@/api/queries'
 
-type Collection = {
-  id: string
-  name: string
-  description: string
-}
+const {
+  isPending,
+  isError,
+  data: queryData,
+  error,
+} = useQuery({
+  queryKey: ['collections'],
+  queryFn: fetchCollections,
+})
+
+const tableData = computed(() => queryData.value ?? [])
 
 const rowSelection = ref<RowSelectionState>({})
 const selectedRowId = computed(() => {
@@ -22,7 +31,7 @@ const selectedRowId = computed(() => {
   return keys.length === 1 ? keys[0] : undefined
 })
 
-const columnHelper = createColumnHelper<Collection>()
+const columnHelper = createColumnHelper<CollectionPreview>()
 
 const columns = [
   columnHelper.display({
@@ -56,22 +65,9 @@ const columns = [
   }),
 ]
 
-const data = ref<Collection[]>([
-  {
-    id: '1',
-    name: "Men's",
-    description: "Men's clothing",
-  },
-  {
-    id: '2',
-    name: "Women's",
-    description: "Women's clothing",
-  },
-])
-
 const table = useVueTable({
   columns,
-  data,
+  data: tableData,
   state: {
     get rowSelection() {
       return rowSelection.value
@@ -127,6 +123,8 @@ const isSomeRowsSelected = computed(() => Boolean(Object.keys(rowSelection.value
         </RouterLink>
       </div>
     </div>
-    <TableComponent :table="table" />
+    <div v-if="isPending">Loading...</div>
+    <div v-else-if="isError">Something went wrong: {{ error }}</div>
+    <TableComponent v-else-if="queryData" :table="table" />
   </div>
 </template>

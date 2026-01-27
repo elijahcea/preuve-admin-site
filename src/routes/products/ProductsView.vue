@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { type Product } from '@/lib/types'
+import { type ProductPreview } from '@/lib/types'
 import TableComponent from '@/components/TableComponent.vue'
 import CheckboxComponent from '@/components/CheckboxComponent.vue'
 import {
@@ -10,6 +10,20 @@ import {
   type RowSelectionState,
 } from '@tanstack/vue-table'
 import { computed, ref } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
+import { fetchProducts } from '@/api/queries'
+
+const {
+  isPending,
+  isError,
+  data: queryData,
+  error,
+} = useQuery({
+  queryKey: ['products'],
+  queryFn: fetchProducts,
+})
+
+const tableData = computed<ProductPreview[]>(() => queryData.value ?? [])
 
 const rowSelection = ref<RowSelectionState>({})
 const selectedRowId = computed(() => {
@@ -17,7 +31,7 @@ const selectedRowId = computed(() => {
   return keys.length === 1 ? keys[0] : undefined
 })
 
-const columnHelper = createColumnHelper<Product>()
+const columnHelper = createColumnHelper<ProductPreview>()
 
 const columns = [
   columnHelper.display({
@@ -41,8 +55,12 @@ const columns = [
     header: 'Product',
     sortingFn: 'alphanumeric',
   }),
-  columnHelper.accessor('price', {
-    header: 'Price',
+  columnHelper.accessor('status', {
+    header: 'Status',
+    enableSorting: false,
+  }),
+  columnHelper.accessor('description', {
+    header: 'Description',
     enableSorting: false,
   }),
   columnHelper.accessor('id', {
@@ -51,22 +69,9 @@ const columns = [
   }),
 ]
 
-const data = ref<Product[]>([
-  {
-    id: '1',
-    name: 'shirt',
-    price: 20,
-  },
-  {
-    id: '2',
-    name: 'shorts',
-    price: 30,
-  },
-])
-
 const table = useVueTable({
   columns,
-  data,
+  data: tableData,
   state: {
     get rowSelection() {
       return rowSelection.value
@@ -122,6 +127,8 @@ const isSomeRowsSelected = computed(() => Boolean(Object.keys(rowSelection.value
         </RouterLink>
       </div>
     </div>
-    <TableComponent :table="table" />
+    <div v-if="isPending">Loading...</div>
+    <div v-else-if="isError">An error has occured: {{ error }}</div>
+    <TableComponent v-else-if="queryData" :table="table" />
   </div>
 </template>
