@@ -13,7 +13,6 @@ export type ProductVariant = {
   sku: string
   name: string
   price: number
-  isAvailableForSale: boolean
   image?: Image
   href: string
   selectedOptions: SelectedOption[]
@@ -22,6 +21,7 @@ export type ProductVariant = {
 
 export type Product = {
   id: string
+  status: boolean
   slug: string
   name: string
   description: string
@@ -29,11 +29,11 @@ export type Product = {
     minVariantPrice: number
     maxVariantPrice: number
   }
-  isAvailableForSale: boolean
   featuredImage?: Image
   createdAt: Date
   updatedAt: Date
 
+  collections: CollectionPreview[]
   options: string[]
   optionsWithValues: ProductOption[]
   variants: ProductVariant[]
@@ -46,8 +46,16 @@ export type Image = {
   height?: number
 }
 
+export type ProductPreview = Omit<
+  Product,
+  'collections' | 'options' | 'optionsWithValues' | 'variants' | 'priceRange'
+>
+
 export type Collection = {
   id: string
   name: string
-  description: string
+  description: string | null
+  products: ProductPreview[]
 }
+
+export type CollectionPreview = Omit<Collection, 'products'>
