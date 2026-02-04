@@ -21,7 +21,10 @@ const { symbol } = currencyInfo
 <template>
   <div class="max-w-2xl flex flex-col m-auto items-center gap-5">
     <div class="flex items-center justify-start w-full gap-3">
-      <RouterLink to="/products" class="p-1 hover:bg-current/20 rounded border border-gray-400">
+      <RouterLink
+        :to="{ name: 'products' }"
+        class="p-1 hover:bg-current/20 rounded border border-gray-400"
+      >
         <ArrowLeftIcon class="size-5" />
       </RouterLink>
       <h1 class="font-bold text-xl">Create product</h1>
@@ -37,7 +40,7 @@ const { symbol } = currencyInfo
       </div>
     </div>
     <form class="w-full text-sm flex flex-col gap-5">
-      <fieldset class="bg-background rounded shadow-lg p-3">
+      <section class="bg-background rounded shadow-lg p-3">
         <div>
           <label for="title">Title</label>
           <input
@@ -57,8 +60,8 @@ const { symbol } = currencyInfo
             class="resize-none border border-gray-300 rounded p-1 w-full my-1"
           ></textarea>
         </div>
-      </fieldset>
-      <fieldset class="bg-background rounded shadow p-3">
+      </section>
+      <section class="bg-background rounded shadow p-3">
         <h2 class="font-semibold mb-4">Pricing</h2>
         <label for="price">Price ({{ symbol }})</label>
         <input
@@ -68,8 +71,8 @@ const { symbol } = currencyInfo
           type="number"
           class="w-full border border-gray-300 rounded p-1 my-1"
         />
-      </fieldset>
-      <fieldset class="bg-background rounded shadow-lg p-3">
+      </section>
+      <section class="bg-background rounded shadow-lg p-3">
         <h2 class="font-semibold mb-4">Inventory</h2>
         <div class="flex justify-center gap-2">
           <div class="w-full">
@@ -92,8 +95,8 @@ const { symbol } = currencyInfo
             />
           </div>
         </div>
-      </fieldset>
-      <fieldset class="bg-background rounded shadow-lg p-3 min-w-0">
+      </section>
+      <section class="bg-background rounded shadow-lg p-3 min-w-0">
         <h2 class="font-semibold mb-4">Product organization</h2>
         <Listbox v-model="selectedCollections" name="selected-collections" multiple>
           <ListboxLabel>Collections</ListboxLabel>
@@ -150,8 +153,8 @@ const { symbol } = currencyInfo
             </transition>
           </div>
         </Listbox>
-      </fieldset>
-      <fieldset class="bg-background rounded shadow-lg p-3">
+      </section>
+      <section class="bg-background rounded shadow-lg p-3">
         <Listbox v-model="productStatus" name="product-status">
           <ListboxLabel class="font-semibold"> Product status </ListboxLabel>
           <ListboxButton
@@ -195,7 +198,7 @@ const { symbol } = currencyInfo
             </transition>
           </div>
         </Listbox>
-      </fieldset>
+      </section>
       <div class="m-auto">
         <button type="button" class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">Discard</button>
         <button type="submit" class="bg-blue-300 rounded p-2 ml-2 hover:bg-blue-300/70">
