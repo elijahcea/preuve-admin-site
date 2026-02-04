@@ -14,11 +14,11 @@ const itemStyles = 'flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounde
         <HomeIcon :class="iconSize"></HomeIcon>
         <p>Home</p>
       </RouterLink>
-      <RouterLink to="/products" :class="itemStyles">
+      <RouterLink :to="{ name: 'products' }" :class="itemStyles">
         <ShoppingBagIcon :class="iconSize"></ShoppingBagIcon>
         <p>Products</p>
       </RouterLink>
-      <RouterLink to="/collections" :class="itemStyles">
+      <RouterLink :to="{ name: 'collections' }" :class="itemStyles">
         <TagIcon :class="iconSize"></TagIcon>
         <p>Collections</p>
       </RouterLink>

@@ -15,7 +15,7 @@ const router = createRouter({
     {
       path: '/products',
       children: [
-        { path: '', component: ProductsView },
+        { path: '', name: 'products', component: ProductsView },
         { path: 'new', name: 'newProduct', component: NewProductView },
         {
           path: ':id',
@@ -28,7 +28,7 @@ const router = createRouter({
     {
       path: '/collections',
       children: [
-        { path: '', component: CollectionsView },
+        { path: '', name: 'collections', component: CollectionsView },
         { path: 'new', name: 'newCollection', component: NewCollectionView },
         {
           path: ':id',
