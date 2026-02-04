@@ -9,7 +9,7 @@ import {
   getSortedRowModel,
   type RowSelectionState,
 } from '@tanstack/vue-table'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { fetchProducts } from '@/api/queries'
 
@@ -17,13 +17,24 @@ const {
   isPending,
   isError,
   data: queryData,
+  isSuccess,
   error,
 } = useQuery({
   queryKey: ['products'],
   queryFn: fetchProducts,
 })
 
-const tableData = computed<ProductPreview[]>(() => queryData.value ?? [])
+const tableData = ref<ProductPreview[]>([])
+
+watch(
+  isSuccess,
+  (isSuccess) => {
+    if (isSuccess && queryData.value) {
+      tableData.value = queryData.value
+    }
+  },
+  { immediate: true },
+)
 
 const rowSelection = ref<RowSelectionState>({})
 const selectedRowId = computed(() => {
