@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   type RowSelectionState,
 } from '@tanstack/vue-table'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { type CollectionPreview } from '@/lib/types'
 import { useQuery } from '@tanstack/vue-query'
 import { fetchCollections } from '@/api/queries'
@@ -17,13 +17,24 @@ const {
   isPending,
   isError,
   data: queryData,
+  isSuccess,
   error,
 } = useQuery({
   queryKey: ['collections'],
   queryFn: fetchCollections,
 })
 
-const tableData = computed(() => queryData.value ?? [])
+const tableData = ref<CollectionPreview[]>([])
+
+watch(
+  isSuccess,
+  (isSuccess) => {
+    if (isSuccess && queryData.value) {
+      tableData.value = queryData.value
+    }
+  },
+  { immediate: true },
+)
 
 const rowSelection = ref<RowSelectionState>({})
 const selectedRowId = computed(() => {
