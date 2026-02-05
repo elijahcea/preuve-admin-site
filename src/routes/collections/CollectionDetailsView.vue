@@ -146,7 +146,9 @@ watch(
         </Listbox>
       </section>
       <div class="m-auto">
-        <button type="button" class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">Discard</button>
+        <RouterLink :to="{ name: 'collections' }">
+          <button class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">Discard</button>
+        </RouterLink>
         <button type="submit" class="bg-blue-300 rounded p-2 ml-2 hover:bg-blue-300/70">
           Save
         </button>
