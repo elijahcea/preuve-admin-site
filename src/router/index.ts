@@ -1,12 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/routes/HomeView.vue'
-import ProductsView from '@/routes/products/ProductsView.vue'
-import CollectionsView from '@/routes/collections/CollectionsView.vue'
-import OptionsView from '@/routes/OptionsView.vue'
-import ProductDetailsView from '@/routes/products/ProductDetailsView.vue'
-import CollectionDetailsView from '@/routes/collections/CollectionDetailsView.vue'
-import NewProductView from '@/routes/products/NewProductView.vue'
-import NewCollectionView from '@/routes/collections/NewCollectionView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,12 +8,20 @@ const router = createRouter({
     {
       path: '/products',
       children: [
-        { path: '', name: 'products', component: ProductsView },
-        { path: 'new', name: 'newProduct', component: NewProductView },
+        {
+          path: '',
+          name: 'products',
+          component: () => import('@/routes/products/ProductsView.vue'),
+        },
+        {
+          path: 'new',
+          name: 'newProduct',
+          component: () => import('@/routes/products/NewProductView.vue'),
+        },
         {
           path: ':id',
           name: 'productDetails',
-          component: ProductDetailsView,
+          component: () => import('@/routes/products/ProductDetailsView.vue'),
           props: true,
         },
       ],
@@ -28,17 +29,24 @@ const router = createRouter({
     {
       path: '/collections',
       children: [
-        { path: '', name: 'collections', component: CollectionsView },
-        { path: 'new', name: 'newCollection', component: NewCollectionView },
+        {
+          path: '',
+          name: 'collections',
+          component: () => import('@/routes/collections/CollectionsView.vue'),
+        },
+        {
+          path: 'new',
+          name: 'newCollection',
+          component: () => import('@/routes/collections/NewCollectionView.vue'),
+        },
         {
           path: ':id',
           name: 'collectionDetails',
-          component: CollectionDetailsView,
+          component: () => import('@/routes/collections/CollectionDetailsView.vue'),
           props: true,
         },
       ],
     },
-    { path: '/options', component: OptionsView },
   ],
 })
 
