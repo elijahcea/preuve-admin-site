@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { status } = defineProps<{
-  status?: boolean
+  status: boolean
 }>()
 </script>
 
