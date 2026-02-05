@@ -6,10 +6,8 @@ const itemStyles = 'flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounde
 </script>
 
 <template>
-  <nav
-    class="min-w-3xs px-1.5 py-3 bg-gray-200 inset-shadow-sm font-semibold border-r border-r-gray-200"
-  >
-    <ul>
+  <nav class="min-w-3xs px-2 bg-gray-200 inset-shadow-sm font-semibold border-r border-r-gray-200">
+    <ul class="sticky top-18">
       <RouterLink to="/" :class="itemStyles">
         <HomeIcon :class="iconSize"></HomeIcon>
         <p>Home</p>
