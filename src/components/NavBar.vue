@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShoppingBagIcon, TagIcon, SwatchIcon, HomeIcon } from '@heroicons/vue/24/outline'
+import { ShoppingBagIcon, TagIcon, HomeIcon } from '@heroicons/vue/24/outline'
 
 const iconSize = 'size-5'
 const itemStyles = 'flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounded'
@@ -21,10 +21,6 @@ const itemStyles = 'flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounde
       <RouterLink :to="{ name: 'collections' }" :class="itemStyles">
         <TagIcon :class="iconSize"></TagIcon>
         <p>Collections</p>
-      </RouterLink>
-      <RouterLink to="/options" :class="itemStyles">
-        <SwatchIcon :class="iconSize"></SwatchIcon>
-        <p>Options</p>
       </RouterLink>
     </ul>
   </nav>
