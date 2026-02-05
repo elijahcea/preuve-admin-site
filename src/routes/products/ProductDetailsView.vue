@@ -15,6 +15,8 @@ import StatusLabel from '@/components/StatusLabel.vue'
 import { type CollectionPreview, type Product, type ProductOption } from '@/lib/types'
 import ProductOptionPanel from '@/components/ProductOptionPanel.vue'
 import TitleAndDescription from '@/components/TitleAndDescription.vue'
+import PricingPanel from '@/components/PricingPanel.vue'
+import InventoryPanel from '@/components/InventoryPanel.vue'
 
 const props = defineProps<{
   id: string
@@ -37,6 +39,9 @@ const description = ref<string>('')
 const collections = ref<CollectionPreview[]>([])
 const selectedCollections = ref<CollectionPreview[]>([])
 const productStatus = ref<boolean>(false)
+const price = ref<number>(0)
+const sku = ref<string>('')
+const quantity = ref<number>(0)
 const optionsStatus = ref<boolean>(false)
 const options = ref<ProductOption[]>([])
 
@@ -95,17 +100,9 @@ const handleSubmit = () => {}
 
           <!-- Show Default Variant pricing and inventory if product has no options -->
           <template v-if="!optionsStatus">
-            <section class="bg-background rounded shadow p-3">
-              <h2 class="font-semibold mb-4">Pricing</h2>
-              <label for="price">Price ({{ symbol }})</label>
-              <input
-                id="price"
-                name="price"
-                placeholder="0.00"
-                type="number"
-                class="w-full border border-gray-300 rounded p-2 my-1"
-              />
-            </section>
+            <PricingPanel v-model="price" :currency-symbol="symbol" />
+            <InventoryPanel v-model:sku="sku" v-model:quantity="quantity" />
+
             <section class="bg-background rounded shadow-lg p-3">
               <h2 class="font-semibold mb-4">Inventory</h2>
               <div class="flex justify-center gap-2">
@@ -219,9 +216,9 @@ const handleSubmit = () => {}
       <div>
         <!-- Save changes or discard buttons -->
         <div class="mb-3.5">
-          <button type="button" class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">
-            Discard
-          </button>
+          <RouterLink :to="{ name: 'products' }">
+            <button class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">Discard</button>
+          </RouterLink>
           <button type="submit" class="bg-blue-300 rounded p-2 ml-2 hover:bg-blue-300/70">
             Save
           </button>
