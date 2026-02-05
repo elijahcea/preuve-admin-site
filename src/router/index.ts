@@ -4,7 +4,7 @@ import HomeView from '@/routes/HomeView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', component: HomeView },
+    { path: '/', name: 'home', component: HomeView },
     {
       path: '/products',
       children: [
