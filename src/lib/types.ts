@@ -122,7 +122,7 @@ export type OptionValueCreateInput = {
 }
 
 export type ProductVariantCreateInput = {
-  sku: string
+  sku: string | null
   price: number
   inventoryQuantity: number
 
