@@ -8,7 +8,7 @@ import NavBar from './components/NavBar.vue'
   <HeaderComponent />
   <div class="flex min-h-full text-sm">
     <NavBar />
-    <main class="grow p-3 bg-gray-100">
+    <main class="grow p-3 bg-background">
       <RouterView />
     </main>
   </div>

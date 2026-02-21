@@ -9,7 +9,7 @@ import { BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
         <BuildingStorefrontIcon class="size-5" />
         <RouterLink :to="{ name: 'home' }">Preuve Admin</RouterLink>
       </div>
-      <button class="bg-current/10 rounded p-2 hover:bg-current/20 text-sm">Login</button>
+      <button class="bg-fill rounded p-2 hover:bg-fill/70 text-sm">Login</button>
     </nav>
   </header>
 </template>

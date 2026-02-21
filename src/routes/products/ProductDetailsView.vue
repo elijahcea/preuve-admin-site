@@ -12,7 +12,12 @@ import { ArrowLeftIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/24/o
 import { useQuery } from '@tanstack/vue-query'
 import { fetchCollections, fetchProduct } from '@/api/queries'
 import StatusLabel from '@/components/StatusLabel.vue'
-import { type CollectionPreview, type Product, type ProductOption } from '@/lib/types'
+import {
+  type ProductVariant,
+  type CollectionPreview,
+  type Product,
+  type ProductOption,
+} from '@/lib/types'
 import ProductOptionPanel from '@/components/ProductOptionPanel.vue'
 import TitleAndDescription from '@/components/TitleAndDescription.vue'
 import PricingPanel from '@/components/PricingPanel.vue'
@@ -44,6 +49,7 @@ const sku = ref<string>('')
 const quantity = ref<number>(0)
 const optionsStatus = ref<boolean>(false)
 const options = ref<ProductOption[]>([])
+const variants = ref<ProductVariant[]>([])
 
 watch(
   productQuery.isSuccess,
@@ -51,12 +57,13 @@ watch(
     if (isSuccess && productQuery.data.value) {
       const product: Product = JSON.parse(JSON.stringify(productQuery.data.value))
 
-      title.value = product.name
+      title.value = product.title
       description.value = product.description
       selectedCollections.value = product.collections
       productStatus.value = product.status
       optionsStatus.value = product.options.length > 0
       options.value = product.options.sort((prev, curr) => prev.position - curr.position)
+      variants.value = product.variants
     }
   },
   { immediate: true },
@@ -99,11 +106,11 @@ const handleSubmit = () => {}
           <TitleAndDescription v-model:title="title" v-model:description="description" />
 
           <!-- Show Default Variant pricing and inventory if product has no options -->
-          <template v-if="!optionsStatus">
+          <template v-if="productQuery.data.value.hasOnlyDefaultVariant">
             <PricingPanel v-model="price" :currency-symbol="symbol" />
             <InventoryPanel v-model:sku="sku" v-model:quantity="quantity" />
 
-            <section class="bg-background rounded shadow-lg p-3">
+            <section class="bg-light rounded shadow-lg p-3">
               <h2 class="font-semibold mb-4">Inventory</h2>
               <div class="flex justify-center gap-2">
                 <div class="w-full">
@@ -130,7 +137,7 @@ const handleSubmit = () => {}
           </template>
 
           <!-- Product organization/collections -->
-          <section class="bg-background rounded shadow-lg p-3 min-w-0">
+          <section class="bg-light rounded shadow-lg p-3 min-w-0">
             <h2 class="font-semibold mb-4">Product organization</h2>
             <div v-if="collectionsQuery.isPending.value">Loading...</div>
             <div v-else-if="collectionsQuery.isError.value">
@@ -152,7 +159,7 @@ const handleSubmit = () => {}
                     :key="collection.id"
                     class="rounded-2xl border border-blue-900 bg-blue-100 max-w-xs p-1"
                   >
-                    <p class="truncate">{{ collection.name }}</p>
+                    <p class="truncate">{{ collection.title }}</p>
                   </div>
                 </div>
                 <p v-else>Select collections</p>
@@ -167,7 +174,7 @@ const handleSubmit = () => {}
                   leave-to-class="opacity-0"
                 >
                   <ListboxOptions
-                    class="absolute z-50 w-full bg-background shadow-lg rounded border border-gray-300"
+                    class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
                   >
                     <template v-if="collections.length">
                       <ListboxOption
@@ -186,7 +193,7 @@ const handleSubmit = () => {}
                             <CheckIcon class="size-5" aria-hidden="true" />
                           </span>
                           <p :class="[selected ? 'font-medium' : 'font-normal', 'pl-5 truncate']">
-                            {{ collection.name }}
+                            {{ collection.title }}
                           </p>
                         </li>
                       </ListboxOption>
@@ -201,7 +208,7 @@ const handleSubmit = () => {}
           </section>
 
           <!-- Options section -->
-          <section class="bg-background rounded shadow-lg">
+          <section class="bg-light rounded shadow-lg">
             <div class="p-4 border-b border-gray-200">
               <h2 class="font-semibold mb-4">Options</h2>
               <div class="flex gap-2">
@@ -209,7 +216,11 @@ const handleSubmit = () => {}
                 <label for="options">This product has options, like size or color</label>
               </div>
             </div>
-            <ProductOptionPanel v-if="optionsStatus" v-model="options" />
+            <ProductOptionPanel
+              v-if="optionsStatus"
+              v-model:options="options"
+              v-model:variants="variants"
+            />
           </section>
         </form>
       </div>
@@ -224,7 +235,7 @@ const handleSubmit = () => {}
           </button>
         </div>
         <!-- Product status -->
-        <section class="bg-background rounded shadow-lg p-3">
+        <section class="bg-light rounded shadow-lg p-3">
           <Listbox v-model="productStatus" name="product-status">
             <ListboxLabel class="font-semibold">Product status</ListboxLabel>
             <ListboxButton
@@ -242,7 +253,7 @@ const handleSubmit = () => {}
                 leave-to-class="opacity-0"
               >
                 <ListboxOptions
-                  class="absolute z-50 w-full bg-background shadow-lg rounded border border-gray-300"
+                  class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
                 >
                   <ListboxOption :value="true" v-slot="{ active, selected }" as="template">
                     <li :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-2 cursor-default']">

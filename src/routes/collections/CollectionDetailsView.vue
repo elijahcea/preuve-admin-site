@@ -38,7 +38,7 @@ watch(
     if (isSuccess && collectionQuery.data.value) {
       const collection: Collection = JSON.parse(JSON.stringify(collectionQuery.data.value))
 
-      title.value = collection.name
+      title.value = collection.title
       description.value = collection.description
       selectedProducts.value = collection.products
     }
@@ -79,7 +79,7 @@ watch(
       <!-- Title and Description -->
       <TitleAndDescription v-model:title="title" v-model:description="description" />
 
-      <section class="bg-background rounded shadow-lg p-3 min-w-0">
+      <section class="bg-light rounded shadow-lg p-3 min-w-0">
         <div v-if="productsQuery.isPending.value">Loading...</div>
         <div v-else-if="productsQuery.isError.value">
           Something went wrong: {{ productsQuery.error.value }}
@@ -101,7 +101,7 @@ watch(
                   :key="product.id"
                   class="rounded-2xl border border-blue-900 bg-blue-100 max-w-xs p-1"
                 >
-                  <p class="truncate">{{ product.name }}</p>
+                  <p class="truncate">{{ product.title }}</p>
                 </div>
               </div>
             </template>
@@ -117,7 +117,7 @@ watch(
               leave-to-class="opacity-0"
             >
               <ListboxOptions
-                class="absolute z-50 w-full bg-background shadow-lg rounded border border-gray-300"
+                class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
               >
                 <template v-if="products.length">
                   <ListboxOption
@@ -132,7 +132,7 @@ watch(
                         <CheckIcon class="size-5" aria-hidden="true" />
                       </span>
                       <p :class="[selected ? 'font-medium' : 'font-normal', 'pl-5 truncate']">
-                        {{ product.name }}
+                        {{ product.title }}
                       </p>
                     </li>
                   </ListboxOption>

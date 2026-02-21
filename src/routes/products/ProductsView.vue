@@ -62,7 +62,7 @@ const columns = [
       ></CheckboxComponent>
     ),
   }),
-  columnHelper.accessor('name', {
+  columnHelper.accessor('title', {
     header: 'Product',
     sortingFn: 'alphanumeric',
   }),

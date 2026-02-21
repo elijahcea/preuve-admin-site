@@ -4,7 +4,7 @@ const quantity = defineModel<number>('quantity', { required: true })
 </script>
 
 <template>
-  <section class="bg-background rounded shadow-lg p-3">
+  <section class="bg-light rounded shadow-lg p-3">
     <h2 class="font-semibold mb-4">Inventory</h2>
     <div class="flex justify-center gap-2">
       <div class="w-full">

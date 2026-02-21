@@ -4,7 +4,7 @@ const description = defineModel<string>('description', { required: true })
 </script>
 
 <template>
-  <section class="bg-background rounded shadow-lg p-3">
+  <section class="bg-light rounded shadow-lg p-3">
     <div>
       <label for="title">Title</label>
       <input

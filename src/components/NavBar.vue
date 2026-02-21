@@ -2,11 +2,13 @@
 import { ShoppingBagIcon, TagIcon, HomeIcon } from '@heroicons/vue/24/outline'
 
 const iconSize = 'size-5'
-const itemStyles = 'flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounded'
+const itemStyles = 'flex items-center px-2 py-1 gap-2 hover:bg-(--nav-bg-hover) rounded'
 </script>
 
 <template>
-  <nav class="min-w-3xs px-2 bg-gray-200 inset-shadow-sm font-semibold border-r border-r-gray-200">
+  <nav
+    class="min-w-3xs px-3 bg-(--nav-bg) inset-shadow-sm font-semibold border-r border-r-gray-200"
+  >
     <ul class="sticky top-18">
       <RouterLink to="/" :class="itemStyles">
         <HomeIcon :class="iconSize"></HomeIcon>
@@ -26,6 +28,12 @@ const itemStyles = 'flex items-center px-2 py-1 gap-2 hover:bg-current/20 rounde
 
 <style scoped>
 .router-link-active {
-  background-color: var(--color-gray-100);
+  background-color: var(--nav-bg-selected);
+}
+
+nav {
+  --nav-bg: #ebebeb;
+  --nav-bg-hover: #f1f1f1;
+  --nav-bg-selected: #fafafa;
 }
 </style>
