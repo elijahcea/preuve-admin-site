@@ -6,13 +6,17 @@ import NavBar from './components/NavBar.vue'
 
 <template>
   <HeaderComponent />
-  <div class="flex min-h-full text-sm">
+  <div class="flex text-sm content-container">
     <NavBar />
-    <main class="grow p-3 bg-background">
+    <main class="grow p-3 bg-background overflow-y-auto">
       <RouterView />
     </main>
   </div>
   <VueQueryDevtools />
 </template>
 
-<style scoped></style>
+<style scoped>
+.content-container {
+  height: calc(100% - 60px);
+}
+</style>
