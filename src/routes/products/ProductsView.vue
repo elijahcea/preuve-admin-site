@@ -1,4 +1,5 @@
 <script setup lang="tsx">
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { type ProductPreview } from '@/lib/types'
 import TableComponent from '@/components/TableComponent.vue'
 import CheckboxComponent from '@/components/CheckboxComponent.vue'
@@ -10,8 +11,25 @@ import {
   type RowSelectionState,
 } from '@tanstack/vue-table'
 import { computed, ref, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { fetchProducts } from '@/api/queries'
+import { ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { deleteProduct } from '@/api/mutations'
+import { ElMessageBox, ElNotification } from 'element-plus'
+
+const tableData = ref<ProductPreview[]>([])
+const rowSelection = ref<RowSelectionState>({})
+const isLoading = ref(false)
+
+const selectedRowId = computed(() => {
+  const keys = Object.keys(rowSelection.value)
+  return keys.length === 1 ? keys[0] : undefined
+})
+const isSomeRowsSelected = computed(() => Boolean(Object.keys(rowSelection.value).length))
+
+const columnHelper = createColumnHelper<ProductPreview>()
+
+const queryClient = useQueryClient()
 
 const {
   isPending,
@@ -24,25 +42,9 @@ const {
   queryFn: fetchProducts,
 })
 
-const tableData = ref<ProductPreview[]>([])
-
-watch(
-  isSuccess,
-  (isSuccess) => {
-    if (isSuccess && queryData.value) {
-      tableData.value = queryData.value
-    }
-  },
-  { immediate: true },
-)
-
-const rowSelection = ref<RowSelectionState>({})
-const selectedRowId = computed(() => {
-  const keys = Object.keys(rowSelection.value)
-  return keys.length === 1 ? keys[0] : undefined
+const deleteProductMutation = useMutation({
+  mutationFn: (productId: string) => deleteProduct(productId),
 })
-
-const columnHelper = createColumnHelper<ProductPreview>()
 
 const columns = [
   columnHelper.display({
@@ -98,7 +100,78 @@ const table = useVueTable({
   getSortedRowModel: getSortedRowModel(),
 })
 
-const isSomeRowsSelected = computed(() => Boolean(Object.keys(rowSelection.value).length))
+const openConfirmPopover = () => {
+  ElMessageBox.confirm('This action will permanently delete products. Continue?', {
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+  })
+    .then(() => handleDeleteProducts())
+    .catch((reason) => console.log(reason))
+}
+
+const revalidateProducts = async () => {
+  try {
+    await queryClient.invalidateQueries({ queryKey: ['products'] }, { throwOnError: true })
+    if (queryData.value) {
+      tableData.value = queryData.value.products
+    }
+  } catch (e) {
+    ElNotification({
+      title: 'Error refetching products',
+      message: `${e}`,
+      type: 'error',
+      position: 'bottom-right',
+    })
+  }
+}
+
+const handleDeleteProducts = async () => {
+  isLoading.value = true
+
+  const productIds = Object.keys(rowSelection.value)
+  const results = await Promise.allSettled(
+    productIds.map((id) => {
+      return deleteProductMutation.mutateAsync(id)
+    }),
+  )
+
+  const rejectedPromises = results.filter((promise) => promise.status === 'rejected')
+
+  if (rejectedPromises.length) {
+    ElNotification({
+      title: 'Error deleting products',
+      message:
+        rejectedPromises.length > 1
+          ? `Failed to delete ${rejectedPromises.length} products`
+          : `Failed to delete ${rejectedPromises.length} product`,
+      type: 'error',
+      position: 'bottom-right',
+    })
+  } else {
+    ElNotification({
+      title: 'Success',
+      message: `Successfully deleted products`,
+      type: 'success',
+      position: 'bottom-right',
+    })
+  }
+
+  await revalidateProducts()
+
+  table.resetRowSelection(true)
+  isLoading.value = false
+}
+
+watch(
+  isSuccess,
+  (isSuccess) => {
+    if (isSuccess && queryData.value) {
+      tableData.value = queryData.value.products
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -106,40 +179,74 @@ const isSomeRowsSelected = computed(() => Boolean(Object.keys(rowSelection.value
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Products</h1>
       <div class="flex gap-3">
-        <component
-          :is="isSomeRowsSelected ? 'button' : 'span'"
-          :class="
-            'font-bold rounded p-2 bg-red-400 ' +
-            `${isSomeRowsSelected ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`
-          "
-        >
-          Delete
-        </component>
-        <component
-          :is="selectedRowId ? 'RouterLink' : 'span'"
-          :class="
-            'font-bold rounded p-2 bg-blue-400 ' +
-            `${selectedRowId ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`
-          "
-          :to="{
-            name: 'productDetails',
-            params: { id: selectedRowId },
-          }"
-        >
-          Modify
-        </component>
-        <RouterLink
-          class="font-bold rounded p-2 bg-blue-400 hover:opacity-80"
-          :to="{
-            name: 'newProduct',
-          }"
-        >
-          Create product
-        </RouterLink>
+        <Menu as="div" class="relative">
+          <MenuButton class="bg-cool-gray font-bold rounded py-1 px-2">
+            <span>More actions</span>
+            <ChevronDownIcon class="size-5 inline-block font-bold ml-1" aria-hidden="true" />
+          </MenuButton>
+          <transition
+            enter-active-class="transition duration-100 ease-out"
+            enter-from-class="transform scale-95 opacity-0"
+            enter-to-class="transform scale-100 opacity-100"
+            leave-active-class="transition duration-75 ease-in"
+            leave-from-class="transform scale-100 opacity-100"
+            leave-to-class="transform scale-95 opacity-0"
+          >
+            <MenuItems
+              class="absolute p-1 mt-0.5 w-full rounded bg-white shadow-lg divide-y divide-gray-100"
+            >
+              <MenuItem v-slot="{ active }" :disabled="!selectedRowId">
+                <component
+                  :is="selectedRowId ? 'RouterLink' : 'span'"
+                  :to="{
+                    name: 'productDetails',
+                    params: { id: selectedRowId },
+                  }"
+                >
+                  <button
+                    :class="[
+                      { 'bg-cool-gray': active },
+                      'flex items-center gap-1 w-full font-semibold rounded p-2',
+                      `${selectedRowId ?? 'opacity-50'}`,
+                    ]"
+                    type="button"
+                  >
+                    <PencilSquareIcon class="size-4" aria-disabled="true" />
+                    Edit
+                  </button>
+                </component>
+              </MenuItem>
+              <MenuItem v-slot="{ active }" :disabled="!isSomeRowsSelected">
+                <button
+                  :disabled="!isSomeRowsSelected"
+                  :class="[
+                    { 'bg-cool-gray': active },
+                    'flex items-center gap-1 w-full font-semibold rounded p-2',
+                    `${!isSomeRowsSelected ? 'opacity-50' : ''}`,
+                  ]"
+                  type="button"
+                  @click.prevent="openConfirmPopover"
+                >
+                  <TrashIcon class="size-4" aria-disabled="true" />
+                  Delete
+                </button>
+              </MenuItem>
+            </MenuItems>
+          </transition>
+        </Menu>
+        <button class="font-bold rounded py-1 px-2 bg-fill text-background hover:opacity-80">
+          <RouterLink
+            :to="{
+              name: 'newProduct',
+            }"
+          >
+            Create product
+          </RouterLink>
+        </button>
       </div>
     </div>
     <div v-if="isPending">Loading...</div>
     <div v-else-if="isError">An error has occured: {{ error }}</div>
-    <TableComponent v-else-if="queryData" :table="table" />
+    <TableComponent v-else-if="queryData" :table="table" :is-loading="isLoading" />
   </div>
 </template>
