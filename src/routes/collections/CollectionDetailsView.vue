@@ -7,7 +7,7 @@ import {
   ListboxOption,
   ListboxOptions,
 } from '@headlessui/vue'
-import { type Collection, type ProductPreview } from '@/lib/types'
+import { type ProductPreview } from '@/lib/types'
 import { ArrowLeftIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/24/outline'
 import { fetchCollection, fetchProducts } from '@/api/queries'
 import { useQuery } from '@tanstack/vue-query'
@@ -36,7 +36,7 @@ watch(
   collectionQuery.isSuccess,
   (isSuccess) => {
     if (isSuccess && collectionQuery.data.value) {
-      const collection: Collection = JSON.parse(JSON.stringify(collectionQuery.data.value))
+      const collection = collectionQuery.data.value.collection
 
       title.value = collection.title
       description.value = collection.description
@@ -50,7 +50,7 @@ watch(
   productsQuery.isSuccess,
   (isSuccess) => {
     if (isSuccess && productsQuery.data.value) {
-      products.value = JSON.parse(JSON.stringify(productsQuery.data.value))
+      products.value = productsQuery.data.value.products
     }
   },
   { immediate: true },
