@@ -10,6 +10,7 @@
   --text-color: #303030;
   --fill: #303030;
   --light: #ffffff;
+  --cool-gray: #ebebeb;
 }
 
 @theme inline {
@@ -18,6 +19,7 @@
   --color-text-color: var(--text-color);
   --color-fill: var(--fill);
   --color-light: var(--light);
+  --color-cool-gray: var(--cool-gray);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
