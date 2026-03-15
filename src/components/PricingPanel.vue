@@ -3,7 +3,14 @@ const { currencySymbol } = defineProps<{
   currencySymbol: string
 }>()
 
-const price = defineModel<number>({ required: true })
+const price = defineModel<number | null>({ required: true })
+
+const handlePriceChange = (e: Event) => {
+  const currVal = (e.target as HTMLInputElement).valueAsNumber
+  if (!currVal) return
+
+  price.value = Number(currVal.toFixed(2))
+}
 </script>
 
 <template>
@@ -13,16 +20,16 @@ const price = defineModel<number>({ required: true })
     <div class="flex items-center border border-gray-300 rounded">
       <span class="ml-2 opacity-60">{{ currencySymbol }}</span>
       <input
+        required
+        v-model="price"
         id="price"
         name="price"
         placeholder="0.00"
         type="number"
-        maxlength="24"
-        min="0"
-        inputmode="decimal"
-        required
-        v-model="price"
+        min="0.01"
+        step="0.01"
         class="w-full p-2"
+        @change="handlePriceChange"
       />
     </div>
   </section>
