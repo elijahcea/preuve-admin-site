@@ -8,15 +8,22 @@ import {
   ListboxOption,
   ListboxOptions,
 } from '@headlessui/vue'
-import { type CollectionPreview, type ProductOption } from '@/lib/types'
+import {
+  type CollectionPreview,
+  type OptionCreateForm,
+  type ProductCreateDTO,
+  type ProductVariantCreateForm,
+} from '@/lib/types'
 import { ArrowLeftIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/24/outline'
 import { fetchCollections } from '@/api/queries'
-import { useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery } from '@tanstack/vue-query'
 import TitleAndDescription from '@/components/TitleAndDescription.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import PricingPanel from '@/components/PricingPanel.vue'
-import ProductOptionPanel from '@/components/ProductOptionPanel.vue'
+import CreateProductOptionPanel from '@/components/CreateProductOptionPanel.vue'
 import InventoryPanel from '@/components/InventoryPanel.vue'
+import { postNewProduct } from '@/api/mutations'
+import router from '@/router'
 
 const { symbol } = currencyInfo
 
@@ -31,28 +38,106 @@ const {
   queryFn: fetchCollections,
 })
 
-const title = ref<string>('')
-const description = ref<string>('')
+const newProductMutation = useMutation({
+  mutationFn: (newProduct: ProductCreateDTO) => postNewProduct(newProduct),
+  onSuccess: (data) => {
+    const { product } = data
+    router.push({ name: 'productDetails', params: { id: product.id } })
+  },
+})
+
+const title = ref('')
+const description = ref('')
 const collections = ref<CollectionPreview[]>([])
 const selectedCollections = ref<CollectionPreview[]>([])
-const productStatus = ref<boolean>(false)
-const price = ref<number>(0)
-const sku = ref<string>('')
-const quantity = ref<number>(0)
-const optionsStatus = ref<boolean>(false)
-const options = ref<ProductOption[]>([])
+const productStatus = ref(false)
+const defaultVariant = ref({
+  price: null,
+  sku: null,
+  quantity: null,
+})
+const options = ref<OptionCreateForm[]>([])
+const variants = ref<ProductVariantCreateForm[]>([])
 
 watch(
   isSuccess,
   (isSuccess) => {
     if (isSuccess && queryData.value) {
-      collections.value = queryData.value
+      collections.value = queryData.value.collections
     }
   },
   { immediate: true },
 )
 
-const handleSubmit = () => {}
+const handleSubmit = () => {
+  if (options.value.length < 1) {
+    if (!defaultVariant.value.price) {
+      throw new Error('Price cannot be null')
+    }
+    if (!defaultVariant.value.quantity) {
+      throw new Error('Quantity cannot be null')
+    }
+    newProductMutation.mutate({
+      status: productStatus.value,
+      title: title.value,
+      description: description.value,
+      featuredImage: null,
+      collectionIds: selectedCollections.value.map((collection) => collection.id),
+      options: [
+        {
+          name: 'Default option',
+          values: [
+            {
+              name: 'Default option value',
+            },
+          ],
+        },
+      ],
+      variants: [
+        {
+          sku: defaultVariant.value.sku,
+          price: defaultVariant.value.price,
+          inventoryQuantity: defaultVariant.value.quantity,
+          optionValues: [
+            {
+              name: 'Default option value',
+              optionName: 'Default option',
+            },
+          ],
+        },
+      ],
+    })
+  } else {
+    newProductMutation.mutate({
+      status: productStatus.value,
+      title: title.value,
+      description: description.value,
+      featuredImage: null,
+      collectionIds: selectedCollections.value.map((collection) => collection.id),
+      options: options.value.map((option) => ({
+        name: option.name,
+        values: option.values.map((value) => ({
+          name: value.name,
+        })),
+      })),
+      variants: variants.value.map((variant) => {
+        return {
+          sku: variant.sku,
+          price: variant.price,
+          inventoryQuantity: variant.inventoryQuantity,
+          optionValues: variant.optionValues.map((value) => {
+            const parentOption = options.value.find((option) => option.id === value.optionId)
+            if (!parentOption) throw new Error('Option value requires parent option name')
+            return {
+              name: value.name,
+              optionName: parentOption.name,
+            }
+          }),
+        }
+      }),
+    })
+  }
+}
 </script>
 
 <template>
@@ -70,18 +155,27 @@ const handleSubmit = () => {}
         <StatusLabel :status="productStatus" />
       </div>
 
-      <form @submit.prevent="handleSubmit" class="w-full text-sm flex flex-col gap-5">
+      <div v-if="newProductMutation.isPending.value">Creating new product...</div>
+      <form
+        v-else
+        id="newProductForm"
+        @submit.prevent="handleSubmit"
+        class="w-full text-sm flex flex-col gap-5"
+      >
         <!-- Title and Description -->
         <TitleAndDescription v-model:title="title" v-model:description="description" />
 
         <!-- Show Default Variant pricing and inventory if product has no options -->
-        <template v-if="!optionsStatus">
-          <PricingPanel v-model="price" :currency-symbol="symbol" />
-          <InventoryPanel v-model:sku="sku" v-model:quantity="quantity" />
+        <template v-if="!options.length">
+          <PricingPanel v-model="defaultVariant.price" :currency-symbol="symbol" />
+          <InventoryPanel
+            v-model:sku="defaultVariant.sku"
+            v-model:quantity="defaultVariant.quantity"
+          />
         </template>
 
         <!-- Product organization/collections -->
-        <section class="bg-background rounded shadow-lg p-3 min-w-0">
+        <section class="bg-light rounded shadow-lg p-3 min-w-0">
           <h2 class="font-semibold mb-4">Product organization</h2>
           <div v-if="isPending">Loading...</div>
           <div v-else-if="isError">An error has occured: {{ error }}</div>
@@ -101,7 +195,7 @@ const handleSubmit = () => {}
                   :key="collection.id"
                   class="rounded-2xl border border-blue-900 bg-blue-100 max-w-xs p-1"
                 >
-                  <p class="truncate">{{ collection.name }}</p>
+                  <p class="truncate">{{ collection.title }}</p>
                 </div>
               </div>
               <p v-else>Select collections</p>
@@ -116,7 +210,7 @@ const handleSubmit = () => {}
                 leave-to-class="opacity-0"
               >
                 <ListboxOptions
-                  class="absolute z-50 w-full bg-background shadow-lg rounded border border-gray-300"
+                  class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
                 >
                   <template v-if="collections.length">
                     <ListboxOption
@@ -133,7 +227,7 @@ const handleSubmit = () => {}
                           <CheckIcon class="size-5" aria-hidden="true" />
                         </span>
                         <p :class="[selected ? 'font-medium' : 'font-normal', 'pl-5 truncate']">
-                          {{ collection.name }}
+                          {{ collection.title }}
                         </p>
                       </li>
                     </ListboxOption>
@@ -148,15 +242,11 @@ const handleSubmit = () => {}
         </section>
 
         <!-- Options section -->
-        <section class="bg-background rounded shadow-lg">
+        <section class="bg-light rounded shadow-lg">
           <div class="p-4 border-b border-gray-200">
-            <h2 class="font-semibold mb-4">Options</h2>
-            <div class="flex gap-2">
-              <input type="checkbox" id="options" name="optionsStatus" v-model="optionsStatus" />
-              <label for="options">This product has options, like size or color</label>
-            </div>
+            <h2 class="font-semibold">Options</h2>
           </div>
-          <ProductOptionPanel v-if="optionsStatus" v-model="options" />
+          <CreateProductOptionPanel v-model:options="options" v-model:variants="variants" />
         </section>
       </form>
     </div>
@@ -166,12 +256,16 @@ const handleSubmit = () => {}
         <RouterLink :to="{ name: 'products' }">
           <button class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">Discard</button>
         </RouterLink>
-        <button type="submit" class="bg-blue-300 rounded p-2 ml-2 hover:bg-blue-300/70">
+        <button
+          type="submit"
+          form="newProductForm"
+          class="bg-blue-300 rounded p-2 ml-2 hover:bg-blue-300/70"
+        >
           Save
         </button>
       </div>
       <!-- Product status -->
-      <section class="bg-background rounded shadow-lg p-3">
+      <section class="bg-light rounded shadow-lg p-3">
         <Listbox v-model="productStatus" name="product-status">
           <ListboxLabel class="font-semibold">Product status</ListboxLabel>
           <ListboxButton
@@ -189,7 +283,7 @@ const handleSubmit = () => {}
               leave-to-class="opacity-0"
             >
               <ListboxOptions
-                class="absolute z-50 w-full bg-background shadow-lg rounded border border-gray-300"
+                class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
               >
                 <ListboxOption :value="true" v-slot="{ active, selected }" as="template">
                   <li :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-2 cursor-default']">
