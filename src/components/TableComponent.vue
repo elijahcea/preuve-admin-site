@@ -1,13 +1,12 @@
 <script setup lang="ts" generic="T">
 import { type Table, FlexRender } from '@tanstack/vue-table'
 
-const props = defineProps<{ table: Table<T> }>()
-const table = props.table
+const { table, isLoading = false } = defineProps<{ table: Table<T>; isLoading: boolean }>()
 </script>
 
 <template>
   <div class="border border-gray-200 rounded-2xl shadow overflow-hidden">
-    <table class="bg-light min-w-full border-collapse table-auto">
+    <table v-loading="isLoading" class="bg-light min-w-full border-collapse table-auto">
       <thead>
         <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
           <th
@@ -30,8 +29,8 @@ const table = props.table
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
             :class="
-              `font-bold border-t border-t-gray-200 p-3 ` +
-              `${row.getIsSelected() ? `bg-blue-300/50` : ``}`
+              `font-semi-bold border-t border-t-gray-200 p-3 ` +
+              `${row.getIsSelected() ? `bg-cool-gray` : ``}`
             "
           >
             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
