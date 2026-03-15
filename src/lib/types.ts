@@ -97,52 +97,148 @@ export type Collection = {
 
 export type CollectionPreview = Omit<Collection, 'products'>
 
-// API Input types
-export type ProductCreateInput = {
-  product: {
-    status: boolean
-    title: string
-    description: string
-    featuredImage: Image | null
-    collectionIds: string[]
-    options: OptionCreateInput[]
-    variants: ProductVariantCreateInput[]
-  }
+// Input types
+export interface ProductCreateDTO {
+  status: boolean
+  title: string
+  description: string
+  featuredImage: Image | null
+  collectionIds: string[]
+  options: OptionCreateDTO[]
+  variants: ProductVariantCreateDTO[]
 }
 
-export type OptionCreateInput = {
-  position: number
+export interface OptionCreateDTO {
   name: string
   values: OptionValueCreateInput[]
 }
 
+export type OptionCreateInput = OptionCreateDTO & {
+  productId: string
+}
+
 export type OptionValueCreateInput = {
-  position: number
   name: string
 }
 
-export type ProductVariantCreateInput = {
+export interface ProductVariantCreateDTO {
   sku: string | null
   price: number
   inventoryQuantity: number
 
-  optionValues: VariantOptionValueCreateInput[]
+  optionValues: VariantOptionValueCreateDTO[]
 }
 
-export type VariantOptionValueCreateInput = {
+export type ProductVariantCreateInput = ProductVariantCreateDTO & {
+  productId: string
+}
+
+export interface VariantOptionValueCreateDTO {
+  name: string
+  optionName: string
+}
+
+export type VariantOptionValueCreateInput = VariantOptionValueCreateDTO & {
+  id: string
+}
+
+export interface ProductUpdateDTO {
+  status?: boolean
+  title?: string
+  description?: string
+  featuredImage?: Image | null
+  collectionIds?: string[]
+}
+
+export type ProductUpdateInput = ProductUpdateDTO & {
+  id: string
+}
+
+export interface OptionUpdateDTO {
+  name: string
+  values: OptionValueUpdateInput[]
+}
+
+export type OptionUpdateInput = OptionUpdateDTO & {
+  productId: string
+  id: string
+}
+
+export type OptionValueUpdateInput = {
+  id?: string
+  name: string
+  optionName: string
+}
+
+export interface ProductVariantUpdateDTO {
+  sku?: string | null
+  price?: number
+  inventoryQuantity?: number
+
+  optionValues?: VariantOptionValueUpdateDTO[]
+}
+
+export type ProductVariantUpdateInput = ProductVariantUpdateDTO & {
+  productId: string
+  id: string
+}
+
+export interface VariantOptionValueUpdateDTO {
+  id: string
   name: string
   optionName: string
 }
 
 // API Response Types
-export type GetProductResponse = {
+interface ProductResponses {
   product: Product
+  products: Product[]
 }
 
-export type GetProductsResponse = {
-  products: ProductPreview[]
+interface CollectionResponses {
+  collection: Collection
+  collections: Collection[]
 }
 
-export type CreateProductResponse = {
-  product: Product
+export type GetProductResponse = Pick<ProductResponses, 'product'>
+
+export type GetProductsResponse = Pick<ProductResponses, 'products'>
+
+export type CreateProductResponse = Pick<ProductResponses, 'product'>
+
+export type CreateVariantResponse = Pick<ProductResponses, 'product'>
+
+export type UpdateVariantResponse = Pick<ProductResponses, 'product'>
+
+export type GetCollectionResponse = Pick<CollectionResponses, 'collection'>
+
+export type GetCollectionsResponse = Pick<CollectionResponses, 'collections'>
+
+export type CreateCollectionResponse = Pick<CollectionResponses, 'collection'>
+
+export type UpdateProductResponse = Pick<ProductResponses, 'product'>
+
+export type CreateOptionResponse = Pick<ProductResponses, 'product'>
+
+export type UpdateOptionResponse = Pick<ProductResponses, 'product'>
+
+// Form types
+export type ProductVariantCreateForm = {
+  id: string
+  price: number
+  sku: string | null
+  inventoryQuantity: number
+  optionValues: OptionValueCreateForm[]
+}
+
+export type OptionCreateForm = {
+  id: string
+  name: string
+  values: OptionValueCreateForm[]
+}
+
+export type OptionValueCreateForm = {
+  id: string
+  name: string
+  optionId: string
 }
