@@ -28,7 +28,7 @@ const handlePriceChange = (e: Event) => {
         type="number"
         min="0.01"
         step="0.01"
-        class="w-full p-2"
+        class="w-full p-1"
         @change="handlePriceChange"
       />
     </div>

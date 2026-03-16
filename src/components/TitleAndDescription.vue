@@ -10,7 +10,7 @@ const description = defineModel<string>('description', { required: true })
       <input
         id="title"
         type="text"
-        class="border border-gray-300 rounded p-2 w-full mt-1"
+        class="border border-gray-300 rounded p-1 w-full mt-1"
         placeholder="Enter title"
         v-model="title"
       />
@@ -21,7 +21,7 @@ const description = defineModel<string>('description', { required: true })
         id="description"
         placeholder="Enter description"
         rows="5"
-        class="resize-none border border-gray-300 rounded p-2 w-full mt-1"
+        class="resize-none border border-gray-300 rounded p-1 w-full mt-1"
         v-model="description"
       ></textarea>
     </div>

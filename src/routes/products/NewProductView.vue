@@ -165,14 +165,11 @@ const handleSubmit = () => {
         <!-- Title and Description -->
         <TitleAndDescription v-model:title="title" v-model:description="description" />
 
-        <!-- Show Default Variant pricing and inventory if product has no options -->
-        <template v-if="!options.length">
-          <PricingPanel v-model="defaultVariant.price" :currency-symbol="symbol" />
-          <InventoryPanel
-            v-model:sku="defaultVariant.sku"
-            v-model:quantity="defaultVariant.quantity"
-          />
-        </template>
+        <PricingPanel v-model="defaultVariant.price" :currency-symbol="symbol" />
+        <InventoryPanel
+          v-model:sku="defaultVariant.sku"
+          v-model:quantity="defaultVariant.quantity"
+        />
 
         <!-- Product organization/collections -->
         <section class="bg-light rounded shadow-lg p-3 min-w-0">
@@ -187,13 +184,13 @@ const handleSubmit = () => {
           >
             <ListboxLabel>Collections</ListboxLabel>
             <ListboxButton
-              class="relative border border-gray-300 rounded p-2 w-full flex items-center justify-between my-1"
+              class="relative border border-gray-300 rounded p-1 w-full flex items-center justify-between my-1"
             >
               <div v-if="selectedCollections.length" class="flex gap-1 flex-wrap">
                 <div
                   v-for="collection in selectedCollections"
                   :key="collection.id"
-                  class="rounded-2xl border border-blue-900 bg-blue-100 max-w-xs p-1"
+                  class="rounded-xl border border-blue-900 bg-blue-100 max-w-xs p-0.5"
                 >
                   <p class="truncate">{{ collection.title }}</p>
                 </div>
@@ -210,7 +207,7 @@ const handleSubmit = () => {
                 leave-to-class="opacity-0"
               >
                 <ListboxOptions
-                  class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
+                  class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300 divide-y divide-gray-100"
                 >
                   <template v-if="collections.length">
                     <ListboxOption
@@ -221,7 +218,7 @@ const handleSubmit = () => {
                       as="template"
                     >
                       <li
-                        :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-2 cursor-default']"
+                        :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-1 cursor-default']"
                       >
                         <span v-show="selected" class="absolute left-0 pl-0.5 text-blue-600">
                           <CheckIcon class="size-5" aria-hidden="true" />
@@ -232,7 +229,7 @@ const handleSubmit = () => {
                       </li>
                     </ListboxOption>
                   </template>
-                  <ListboxOption v-else disabled class="p-2 opacity-70 cursor-default">
+                  <ListboxOption v-else disabled class="p-1 opacity-70 cursor-default">
                     Create collections
                   </ListboxOption>
                 </ListboxOptions>
@@ -243,7 +240,7 @@ const handleSubmit = () => {
 
         <!-- Options section -->
         <section class="bg-light rounded shadow-lg">
-          <div class="p-4 border-b border-gray-200">
+          <div class="p-3 border-b border-gray-200">
             <h2 class="font-semibold">Options</h2>
           </div>
           <CreateProductOptionPanel v-model:options="options" v-model:variants="variants" />
@@ -254,12 +251,14 @@ const handleSubmit = () => {
       <!-- Save changes or discard buttons -->
       <div class="mb-3.5">
         <RouterLink :to="{ name: 'products' }">
-          <button class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">Discard</button>
+          <button class="font-semibold rounded bg-cool-gray py-1 px-2 hover:opacity-80">
+            Discard
+          </button>
         </RouterLink>
         <button
           type="submit"
           form="newProductForm"
-          class="bg-blue-300 rounded p-2 ml-2 hover:bg-blue-300/70"
+          class="font-bold rounded py-1 px-2 ml-2 bg-fill text-background hover:opacity-80"
         >
           Save
         </button>
@@ -269,7 +268,7 @@ const handleSubmit = () => {
         <Listbox v-model="productStatus" name="product-status">
           <ListboxLabel class="font-semibold">Product status</ListboxLabel>
           <ListboxButton
-            class="relative border border-gray-300 rounded p-2 w-full flex items-center justify-between my-2"
+            class="relative border border-gray-300 rounded p-1 w-full flex items-center justify-between my-2"
           >
             <p>{{ productStatus ? 'Active' : 'Draft' }}</p>
             <span>

@@ -14,7 +14,7 @@ const quantity = defineModel<number | null>('quantity', { required: true })
           name="sku"
           type="text"
           v-model="sku"
-          class="border border-gray-300 rounded p-2 w-full my-1"
+          class="border border-gray-300 rounded p-1 w-full my-1"
         />
       </div>
       <div class="w-full">
@@ -27,7 +27,7 @@ const quantity = defineModel<number | null>('quantity', { required: true })
           type="number"
           min="0"
           step="1"
-          class="border border-gray-300 rounded p-2 w-full my-1"
+          class="border border-gray-300 rounded p-1 w-full my-1"
         />
       </div>
     </div>
