@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { currencyInfo } from '@/lib/currencyInfo'
 import {
   Listbox,
@@ -27,6 +27,24 @@ import { postNewProduct } from '@/api/mutations'
 import router from '@/router'
 import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-table'
 
+const title = ref('')
+const description = ref('')
+const collections = ref<CollectionPreview[]>([])
+const selectedCollections = ref<CollectionPreview[]>([])
+const productStatus = ref(false)
+const defaultVariant = ref({
+  price: null,
+  sku: null,
+  quantity: null,
+})
+const options = ref<OptionCreateForm[]>([])
+const variants = ref<ProductVariantCreateForm[]>([])
+
+const validOptions = computed(() =>
+  options.value.filter((option) => option.values.some((value) => value.name.length)),
+)
+
+const columnHelper = createColumnHelper<ProductVariantCreateForm>()
 const { symbol } = currencyInfo
 
 const {
@@ -47,21 +65,6 @@ const newProductMutation = useMutation({
     router.push({ name: 'productDetails', params: { id: product.id } })
   },
 })
-
-const title = ref('')
-const description = ref('')
-const collections = ref<CollectionPreview[]>([])
-const selectedCollections = ref<CollectionPreview[]>([])
-const productStatus = ref(false)
-const defaultVariant = ref({
-  price: null,
-  sku: null,
-  quantity: null,
-})
-const options = ref<OptionCreateForm[]>([])
-const variants = ref<ProductVariantCreateForm[]>([])
-
-const columnHelper = createColumnHelper<ProductVariantCreateForm>()
 
 const columns = [
   columnHelper.accessor('id', {
@@ -275,7 +278,7 @@ watch(
         </section>
 
         <!-- Variants table -->
-        <section v-if="variants.length > 0">
+        <section v-if="validOptions.length">
           <TableComponent :table="variantsTable" :is-loading="false" />
         </section>
       </form>
