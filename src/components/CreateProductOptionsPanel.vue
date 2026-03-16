@@ -62,9 +62,13 @@ const isVariantMatch = (
 }
 
 const generateCartesianVariants = (options: OptionCreateForm[]) => {
-  const activeOptions = options.filter((o) => o.values.length)
+  const activeOptions = options.filter((option) => option.values.some((value) => value.name.length))
 
   if (!activeOptions.length) return []
+
+  for (const option of activeOptions) {
+    option.values.filter((value) => value.name.length)
+  }
 
   const combinations = cartesianProduct(activeOptions.map((o) => o.values))
 
@@ -185,7 +189,6 @@ watch(
         />
         <button
           type="button"
-          :disabled="option.values.length === 1"
           @click="deleteOptionValue(optionIndex, valueIndex)"
           class="p-1 hover:bg-cool-gray rounded"
         >
