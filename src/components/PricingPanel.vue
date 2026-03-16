@@ -14,7 +14,7 @@ const handlePriceChange = (e: Event) => {
 </script>
 
 <template>
-  <section class="bg-light rounded shadow p-3">
+  <section class="bg-light rounded-xl shadow p-3">
     <h2 class="font-semibold mb-4">Pricing</h2>
     <label for="price">Price</label>
     <div class="flex items-center border border-gray-300 rounded">

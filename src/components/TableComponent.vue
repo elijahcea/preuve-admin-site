@@ -5,7 +5,7 @@ const { table, isLoading = false } = defineProps<{ table: Table<T>; isLoading: b
 </script>
 
 <template>
-  <div class="border border-gray-200 rounded-2xl shadow overflow-hidden">
+  <div class="border border-gray-200 rounded-xl shadow overflow-hidden">
     <table v-loading="isLoading" class="bg-light min-w-full border-collapse table-auto">
       <thead>
         <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
