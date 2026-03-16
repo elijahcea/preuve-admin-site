@@ -20,10 +20,12 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 import TitleAndDescription from '@/components/TitleAndDescription.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import PricingPanel from '@/components/PricingPanel.vue'
-import CreateProductOptionPanel from '@/components/CreateProductOptionPanel.vue'
+import CreateProductOptionsPanel from '@/components/CreateProductOptionsPanel.vue'
+import TableComponent from '@/components/TableComponent.vue'
 import InventoryPanel from '@/components/InventoryPanel.vue'
 import { postNewProduct } from '@/api/mutations'
 import router from '@/router'
+import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-table'
 
 const { symbol } = currencyInfo
 
@@ -59,15 +61,30 @@ const defaultVariant = ref({
 const options = ref<OptionCreateForm[]>([])
 const variants = ref<ProductVariantCreateForm[]>([])
 
-watch(
-  isSuccess,
-  (isSuccess) => {
-    if (isSuccess && queryData.value) {
-      collections.value = queryData.value.collections
-    }
-  },
-  { immediate: true },
-)
+const columnHelper = createColumnHelper<ProductVariantCreateForm>()
+
+const columns = [
+  columnHelper.accessor('id', {
+    header: 'ID',
+  }),
+  columnHelper.accessor((row) => row.optionValues.map((value) => value.name).join(' / '), {
+    header: 'Title',
+  }),
+  columnHelper.accessor('price', {
+    header: 'Price',
+    sortingFn: 'alphanumeric',
+  }),
+  columnHelper.accessor('inventoryQuantity', {
+    header: 'Inventory',
+    sortingFn: 'alphanumeric',
+  }),
+]
+
+const variantsTable = useVueTable({
+  columns,
+  data: variants,
+  getCoreRowModel: getCoreRowModel(),
+})
 
 const handleSubmit = () => {
   if (options.value.length < 1) {
@@ -138,6 +155,16 @@ const handleSubmit = () => {
     })
   }
 }
+
+watch(
+  isSuccess,
+  (isSuccess) => {
+    if (isSuccess && queryData.value) {
+      collections.value = queryData.value.collections
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -172,7 +199,7 @@ const handleSubmit = () => {
         />
 
         <!-- Product organization/collections -->
-        <section class="bg-light rounded shadow-lg p-3 min-w-0">
+        <section class="bg-light rounded-xl shadow-lg p-3 min-w-0">
           <h2 class="font-semibold mb-4">Product organization</h2>
           <div v-if="isPending">Loading...</div>
           <div v-else-if="isError">An error has occured: {{ error }}</div>
@@ -239,11 +266,17 @@ const handleSubmit = () => {
         </section>
 
         <!-- Options section -->
-        <section class="bg-light rounded shadow-lg">
+        <section class="bg-light rounded-xl shadow-lg">
           <div class="p-3 border-b border-gray-200">
             <h2 class="font-semibold">Options</h2>
+            <p class="text-xs">Define options for the product, e.g. size, color, etc.</p>
           </div>
-          <CreateProductOptionPanel v-model:options="options" v-model:variants="variants" />
+          <CreateProductOptionsPanel v-model:options="options" v-model:variants="variants" />
+        </section>
+
+        <!-- Variants table -->
+        <section v-if="variants.length > 0">
+          <TableComponent :table="variantsTable" :is-loading="false" />
         </section>
       </form>
     </div>
@@ -264,7 +297,7 @@ const handleSubmit = () => {
         </button>
       </div>
       <!-- Product status -->
-      <section class="bg-light rounded shadow-lg p-3">
+      <section class="bg-light rounded-xl shadow-lg p-3">
         <Listbox v-model="productStatus" name="product-status">
           <ListboxLabel class="font-semibold">Product status</ListboxLabel>
           <ListboxButton
@@ -285,7 +318,7 @@ const handleSubmit = () => {
                 class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
               >
                 <ListboxOption :value="true" v-slot="{ active, selected }" as="template">
-                  <li :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-2 cursor-default']">
+                  <li :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-1 cursor-default']">
                     <span v-show="selected" class="absolute left-0 pl-0.5 text-blue-600">
                       <CheckIcon class="size-5" aria-hidden="true" />
                     </span>
@@ -295,7 +328,7 @@ const handleSubmit = () => {
                   </li>
                 </ListboxOption>
                 <ListboxOption :value="false" v-slot="{ active, selected }" as="template">
-                  <li :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-2 cursor-default']">
+                  <li :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-1 cursor-default']">
                     <span v-show="selected" class="absolute left-0 pl-0.5 text-blue-600">
                       <CheckIcon class="size-5" aria-hidden="true" />
                     </span>
