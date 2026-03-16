@@ -13,7 +13,10 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CheckboxComponent: typeof import('./src/components/CheckboxComponent.vue')['default']
+    CreateOptionsAndVariantsPanel: typeof import('./src/components/CreateOptionsAndVariantsPanel.vue')['default']
+    CreateOptionsPanel: typeof import('./src/components/CreateOptionsPanel.vue')['default']
     CreateProductOptionPanel: typeof import('./src/components/CreateProductOptionPanel.vue')['default']
+    CreateProductOptionsPanel: typeof import('./src/components/CreateProductOptionsPanel.vue')['default']
     HeaderComponent: typeof import('./src/components/HeaderComponent.vue')['default']
     InventoryPanel: typeof import('./src/components/InventoryPanel.vue')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
@@ -32,7 +35,10 @@ declare module 'vue' {
 // For TSX support
 declare global {
   const CheckboxComponent: typeof import('./src/components/CheckboxComponent.vue')['default']
+  const CreateOptionsAndVariantsPanel: typeof import('./src/components/CreateOptionsAndVariantsPanel.vue')['default']
+  const CreateOptionsPanel: typeof import('./src/components/CreateOptionsPanel.vue')['default']
   const CreateProductOptionPanel: typeof import('./src/components/CreateProductOptionPanel.vue')['default']
+  const CreateProductOptionsPanel: typeof import('./src/components/CreateProductOptionsPanel.vue')['default']
   const HeaderComponent: typeof import('./src/components/HeaderComponent.vue')['default']
   const InventoryPanel: typeof import('./src/components/InventoryPanel.vue')['default']
   const NavBar: typeof import('./src/components/NavBar.vue')['default']
