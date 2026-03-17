@@ -11,7 +11,6 @@ const description = defineModel<string>('description', { required: true })
         id="title"
         type="text"
         class="border border-gray-300 rounded p-1 w-full mt-1"
-        placeholder="Enter title"
         v-model="title"
       />
     </div>
@@ -19,7 +18,6 @@ const description = defineModel<string>('description', { required: true })
       <label for="description">Description</label>
       <textarea
         id="description"
-        placeholder="Enter description"
         rows="5"
         class="resize-none border border-gray-300 rounded p-1 w-full mt-1"
         v-model="description"
