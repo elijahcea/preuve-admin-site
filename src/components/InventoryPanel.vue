@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { isQuantityRequired } = defineProps<{ isQuantityRequired: boolean }>()
 const sku = defineModel<string | null>('sku', { required: true })
 const quantity = defineModel<number | null>('quantity', { required: true })
 </script>
@@ -20,7 +21,7 @@ const quantity = defineModel<number | null>('quantity', { required: true })
       <div class="w-full">
         <label for="quantity">Quantity</label>
         <input
-          required
+          :required="isQuantityRequired"
           v-model="quantity"
           id="quantity"
           name="quantity"
