@@ -21,7 +21,7 @@ import {
   PencilSquareIcon,
 } from '@heroicons/vue/24/outline'
 import { fetchCollections } from '@/api/queries'
-import { useMutation, useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import TitleAndDescription from '@/components/TitleAndDescription.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import CreateProductOptionsPanel from '@/components/CreateProductOptionsPanel.vue'
@@ -33,6 +33,7 @@ import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-
 import PriceInput from '@/components/PriceInput.vue'
 import EditVariantDialog from '@/components/EditVariantDialog.vue'
 import PriceCell from '@/components/cells/PriceCell.vue'
+import { ElNotification } from 'element-plus'
 
 const title = ref('')
 const description = ref('')
@@ -48,11 +49,13 @@ const options = ref<OptionCreateForm[]>([])
 const variants = ref<ProductVariantCreateForm[]>([])
 const isEditVariantOpen = ref(false)
 const activeEditVariant = ref<ProductVariantCreateForm>()
+const isLoading = ref(false)
 
 const validOptions = computed(() =>
   options.value.filter((option) => option.values.some((value) => value.name.length)),
 )
 
+const queryClient = useQueryClient()
 const columnHelper = createColumnHelper<ProductVariantCreateForm>()
 
 const {
@@ -143,70 +146,105 @@ const cancelVariantEdit = () => {
   isEditVariantOpen.value = false
 }
 
-const handleSubmit = () => {
-  if (options.value.length < 1) {
-    if (!defaultVariant.value.price || !defaultVariant.value.quantity) {
-      throw new Error(`Missing input for price and/or quantity.`)
-    }
-    newProductMutation.mutate({
-      status: productStatus.value,
-      title: title.value,
-      description: description.value,
-      featuredImage: null,
-      collectionIds: selectedCollections.value.map((collection) => collection.id),
-      options: [
-        {
-          name: 'Default option',
-          values: [
-            {
-              name: 'Default option value',
-            },
-          ],
-        },
-      ],
-      variants: [
-        {
-          sku: defaultVariant.value.sku,
-          price: defaultVariant.value.price,
-          inventoryQuantity: defaultVariant.value.quantity,
-          optionValues: [
-            {
-              name: 'Default option value',
-              optionName: 'Default option',
-            },
-          ],
-        },
-      ],
+const revalidateProducts = async () => {
+  try {
+    await queryClient.invalidateQueries({ queryKey: ['products'] }, { throwOnError: true })
+  } catch (e) {
+    ElNotification({
+      title: 'Error refetching products',
+      message: `${e}`,
+      type: 'error',
+      position: 'bottom-right',
     })
-  } else {
-    newProductMutation.mutate({
-      status: productStatus.value,
-      title: title.value,
-      description: description.value,
-      featuredImage: null,
-      collectionIds: selectedCollections.value.map((collection) => collection.id),
-      options: options.value.map((option) => ({
-        name: option.name,
-        values: option.values.map((value) => ({
-          name: value.name,
+  }
+}
+
+const handleSubmit = async () => {
+  try {
+    isLoading.value = true
+    if (options.value.length < 1) {
+      if (!defaultVariant.value.price || !defaultVariant.value.quantity) {
+        throw new Error(`Missing input for price and/or quantity.`)
+      }
+      await newProductMutation.mutate({
+        status: productStatus.value,
+        title: title.value,
+        description: description.value,
+        featuredImage: null,
+        collectionIds: selectedCollections.value.map((collection) => collection.id),
+        options: [
+          {
+            name: 'Default option',
+            values: [
+              {
+                name: 'Default option value',
+              },
+            ],
+          },
+        ],
+        variants: [
+          {
+            sku: defaultVariant.value.sku,
+            price: defaultVariant.value.price,
+            inventoryQuantity: defaultVariant.value.quantity,
+            optionValues: [
+              {
+                name: 'Default option value',
+                optionName: 'Default option',
+              },
+            ],
+          },
+        ],
+      })
+    } else {
+      await newProductMutation.mutate({
+        status: productStatus.value,
+        title: title.value,
+        description: description.value,
+        featuredImage: null,
+        collectionIds: selectedCollections.value.map((collection) => collection.id),
+        options: options.value.map((option) => ({
+          name: option.name,
+          values: option.values.map((value) => ({
+            name: value.name,
+          })),
         })),
-      })),
-      variants: variants.value.map((variant) => {
-        return {
-          sku: variant.sku,
-          price: variant.price,
-          inventoryQuantity: variant.inventoryQuantity,
-          optionValues: variant.optionValues.map((value) => {
-            const parentOption = options.value.find((option) => option.id === value.optionId)
-            if (!parentOption) throw new Error('Option value requires parent option name')
-            return {
-              name: value.name,
-              optionName: parentOption.name,
-            }
-          }),
-        }
-      }),
+        variants: variants.value.map((variant) => {
+          return {
+            sku: variant.sku,
+            price: variant.price,
+            inventoryQuantity: variant.inventoryQuantity,
+            optionValues: variant.optionValues.map((value) => {
+              const parentOption = options.value.find((option) => option.id === value.optionId)
+              if (!parentOption) throw new Error('Option value requires parent option name')
+              return {
+                name: value.name,
+                optionName: parentOption.name,
+              }
+            }),
+          }
+        }),
+      })
+    }
+
+    await revalidateProducts()
+
+    ElNotification({
+      title: 'Success',
+      message: `Successfully created product: ${title.value}`,
+      type: 'success',
+      position: 'bottom-right',
     })
+
+    isLoading.value = false
+  } catch (e) {
+    console.log(e)
+    ElNotification({
+      title: `Error creating product: ${title.value}`,
+      type: 'error',
+      position: 'bottom-right',
+    })
+    isLoading.value = false
   }
 }
 
@@ -223,7 +261,7 @@ watch(
 
 <template>
   <!-- Heading -->
-  <div class="max-w-4xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container">
+  <div v-loading="isLoading" class="max-w-4xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container">
     <div class="flex items-center w-full gap-3">
       <RouterLink
         :to="{ name: 'products' }"

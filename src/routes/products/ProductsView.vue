@@ -127,40 +127,50 @@ const revalidateProducts = async () => {
 }
 
 const handleDeleteProducts = async () => {
-  isLoading.value = true
+  try {
+    isLoading.value = true
 
-  const productIds = Object.keys(rowSelection.value)
-  const results = await Promise.allSettled(
-    productIds.map((id) => {
-      return deleteProductMutation.mutateAsync(id)
-    }),
-  )
+    const productIds = Object.keys(rowSelection.value)
+    const results = await Promise.allSettled(
+      productIds.map((id) => {
+        return deleteProductMutation.mutateAsync(id)
+      }),
+    )
 
-  const rejectedPromises = results.filter((promise) => promise.status === 'rejected')
+    const rejectedPromises = results.filter((promise) => promise.status === 'rejected')
 
-  if (rejectedPromises.length) {
+    if (rejectedPromises.length) {
+      ElNotification({
+        title: 'Error deleting products',
+        message:
+          rejectedPromises.length > 1
+            ? `Failed to delete ${rejectedPromises.length} products`
+            : `Failed to delete ${rejectedPromises.length} product`,
+        type: 'error',
+        position: 'bottom-right',
+      })
+    } else {
+      ElNotification({
+        title: 'Success',
+        message: `Successfully deleted products`,
+        type: 'success',
+        position: 'bottom-right',
+      })
+    }
+
+    await revalidateProducts()
+
+    table.resetRowSelection(true)
+    isLoading.value = false
+  } catch (e) {
+    console.log(e)
     ElNotification({
       title: 'Error deleting products',
-      message:
-        rejectedPromises.length > 1
-          ? `Failed to delete ${rejectedPromises.length} products`
-          : `Failed to delete ${rejectedPromises.length} product`,
       type: 'error',
       position: 'bottom-right',
     })
-  } else {
-    ElNotification({
-      title: 'Success',
-      message: `Successfully deleted products`,
-      type: 'success',
-      position: 'bottom-right',
-    })
+    isLoading.value = false
   }
-
-  await revalidateProducts()
-
-  table.resetRowSelection(true)
-  isLoading.value = false
 }
 
 watch(
