@@ -54,7 +54,6 @@ const validOptions = computed(() =>
 )
 
 const columnHelper = createColumnHelper<ProductVariantCreateForm>()
-const { symbol } = currencyInfo
 
 const {
   isPending,
@@ -76,17 +75,21 @@ const newProductMutation = useMutation({
 })
 
 const columns = [
-  columnHelper.accessor('id', {
-    header: 'ID',
-  }),
   columnHelper.accessor((row) => row.optionValues.map((value) => value.name).join(' / '), {
     header: 'Title',
+  }),
+  columnHelper.accessor('sku', {
+    header: 'SKU',
   }),
   columnHelper.accessor('price', {
     header: 'Price',
     sortingFn: 'alphanumeric',
     cell: (props) => (
-      <PriceCell price={props.cell.getValue()} currencySymbol={currencyInfo.symbol} />
+      <PriceCell
+        price={props.cell.getValue()}
+        locale={currencyInfo.locale}
+        currencySymbol={currencyInfo.symbol}
+      />
     ),
   }),
   columnHelper.accessor('inventoryQuantity', {
@@ -97,10 +100,11 @@ const columns = [
     id: 'actions',
     cell: (props) => (
       <button
+        type="button"
         aria-label="Edit variant"
         class="p-1 rounded hover:bg-cool-gray"
         onClick={() => {
-          activeEditVariant.value = variants.value.find((v) => v.id === props.row.id)
+          activeEditVariant.value = props.row.original
           isEditVariantOpen.value = true
         }}
       >
@@ -117,15 +121,32 @@ const variantsTable = useVueTable({
   getCoreRowModel: getCoreRowModel(),
 })
 
-const saveVariantEdit = () => {}
+const saveVariantEdit = (updatedVariantInfo: Omit<ProductVariantCreateForm, 'optionValues'>) => {
+  const existingVariantIdx = variants.value.findIndex(
+    (variant) => variant.id === updatedVariantInfo.id,
+  )
+  const existingVariant = variants.value[existingVariantIdx]
+  if (!existingVariant) throw new Error(`Variant ID does not exist: ${updatedVariantInfo.id}`)
+
+  const updatedVariant = { ...existingVariant, ...updatedVariantInfo }
+
+  const newVariantsArr = [...variants.value]
+  newVariantsArr.splice(existingVariantIdx, 1, updatedVariant)
+
+  variants.value = newVariantsArr
+  activeEditVariant.value = undefined
+  isEditVariantOpen.value = false
+}
+
+const cancelVariantEdit = () => {
+  activeEditVariant.value = undefined
+  isEditVariantOpen.value = false
+}
 
 const handleSubmit = () => {
   if (options.value.length < 1) {
-    if (!defaultVariant.value.price) {
-      throw new Error('Price cannot be null')
-    }
-    if (!defaultVariant.value.quantity) {
-      throw new Error('Quantity cannot be null')
+    if (!defaultVariant.value.price || !defaultVariant.value.quantity) {
+      throw new Error(`Missing input for price and/or quantity.`)
     }
     newProductMutation.mutate({
       status: productStatus.value,
@@ -355,15 +376,28 @@ watch(
         <!-- Title and Description -->
         <TitleAndDescription v-model:title="title" v-model:description="description" />
 
-        <section class="bg-light rounded-xl shadow p-3">
-          <h2 class="font-semibold mb-4">Pricing</h2>
-          <label for="price">Price</label>
-          <PriceInput input-id="price" v-model="defaultVariant.price" :currency-symbol="symbol" />
-        </section>
-        <InventoryPanel
-          v-model:sku="defaultVariant.sku"
-          v-model:quantity="defaultVariant.quantity"
-        />
+        <Transition name="fade">
+          <section v-if="!options.length" class="bg-light rounded-xl shadow p-3">
+            <h2 class="font-semibold mb-4">Pricing</h2>
+            <label for="price">Price</label>
+            <PriceInput
+              input-id="price"
+              v-model="defaultVariant.price"
+              :locale="currencyInfo.locale"
+              :currency-symbol="currencyInfo.symbol"
+              :required="!isEditVariantOpen"
+            />
+          </section>
+        </Transition>
+
+        <Transition name="fade">
+          <InventoryPanel
+            v-if="!options.length"
+            v-model:sku="defaultVariant.sku"
+            v-model:quantity="defaultVariant.quantity"
+            :is-quantity-required="!isEditVariantOpen"
+          />
+        </Transition>
 
         <!-- Options section -->
         <section class="bg-light rounded-xl shadow-lg">
@@ -375,25 +409,38 @@ watch(
         </section>
 
         <!-- Variants table -->
-        <section v-if="validOptions.length">
-          <EditVariantDialog
-            v-model:is-open="isEditVariantOpen"
-            :currency-symbol="currencyInfo.symbol"
-            :variant-id:="activeEditVariant?.id"
-            :inventory-quantity="activeEditVariant?.inventoryQuantity"
-            :sku="activeEditVariant?.sku"
-            :price="activeEditVariant?.price"
-            @save-variant-edit="saveVariantEdit"
-          />
-          <TableComponent :table="variantsTable" :is-loading="false" />
-        </section>
+        <Transition name="fade">
+          <section v-if="validOptions.length">
+            <EditVariantDialog
+              v-model:is-open="isEditVariantOpen"
+              :currency-symbol="currencyInfo.symbol"
+              :variant-id="activeEditVariant?.id"
+              :inventory-quantity="activeEditVariant?.inventoryQuantity"
+              :sku="activeEditVariant?.sku"
+              :price="activeEditVariant?.price"
+              @save-variant-edit="saveVariantEdit"
+              @cancel-edit="cancelVariantEdit"
+            />
+            <TableComponent :table="variantsTable" :is-loading="false" />
+          </section>
+        </Transition>
       </form>
     </div>
   </div>
 </template>
 
-<style lang="css" module>
+<style lang="css" scoped>
 .grid-container {
   grid-template-rows: min-content auto;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
