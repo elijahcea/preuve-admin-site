@@ -165,7 +165,7 @@ watch(
       <button
         type="button"
         @click="deleteOption(optionIndex)"
-        class="p-1 hover:bg-cool-gray rounded"
+        class="py-1 px-2 hover:bg-cool-gray rounded"
         aria-label="Delete option"
       >
         <XMarkIcon class="size-4" />
@@ -191,7 +191,7 @@ watch(
         <button
           type="button"
           @click="deleteOptionValue(optionIndex, valueIndex)"
-          class="p-1 hover:bg-cool-gray rounded"
+          class="py-1 px-2 hover:bg-cool-gray rounded"
           aria-label="Delete option value"
         >
           <XMarkIcon class="size-4" />
