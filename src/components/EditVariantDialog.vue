@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import PriceInput from './PriceInput.vue'
 
-const isOpen = defineModel<boolean>('isOpen', { required: true })
 const {
+  isOpen,
   variantId,
   inventoryQuantity = 0,
   sku = null,
   price = 0,
   currencySymbol,
 } = defineProps<{
+  isOpen: boolean
   variantId?: string
   inventoryQuantity?: number
   sku?: string | null
   price?: number
   currencySymbol: string
 }>()
-const emit = defineEmits(['saveVariantEdit'])
+const emit = defineEmits(['saveVariantEdit', 'cancelEdit'])
 
 const variantInfo = ref({
   inventoryQuantity,
@@ -25,12 +26,21 @@ const variantInfo = ref({
   price,
 })
 
-const setIsOpen = (value: boolean) => (isOpen.value = value)
+watch(
+  () => variantId,
+  () => {
+    variantInfo.value = {
+      inventoryQuantity,
+      sku,
+      price,
+    }
+  },
+)
 </script>
 
 <template>
   <TransitionRoot :show="isOpen" as="template">
-    <Dialog @close="setIsOpen">
+    <Dialog @close="emit('cancelEdit')">
       <TransitionChild
         as="template"
         enter="duration-300 ease-out"
@@ -86,12 +96,13 @@ const setIsOpen = (value: boolean) => (isOpen.value = value)
               input-id="price"
               :currency-symbol="currencySymbol"
               v-model="variantInfo.price"
+              :required="isOpen"
             />
 
             <div class="flex justify-end gap-1 mt-3">
               <button
                 class="font-semibold rounded bg-cool-gray py-1 px-2 hover:opacity-80"
-                @click="setIsOpen(false)"
+                @click="emit('cancelEdit')"
               >
                 Cancel
               </button>
