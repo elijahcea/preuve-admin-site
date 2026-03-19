@@ -29,7 +29,7 @@ const { table, isLoading = false } = defineProps<{ table: Table<T>; isLoading: b
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
             :class="
-              `font-semi-bold border-t border-t-gray-200 p-3 ` +
+              `font-normal border-t border-t-gray-200 p-3 ` +
               `${row.getIsSelected() ? `bg-cool-gray` : ``}`
             "
           >
