@@ -216,7 +216,7 @@ watch(
                   <button
                     :class="[
                       { 'bg-cool-gray': active },
-                      'flex items-center gap-1 w-full font-semibold rounded p-2',
+                      'flex items-center gap-1 w-full font-semibold rounded-md p-2',
                       `${selectedRowId ?? 'opacity-50'}`,
                     ]"
                     type="button"
@@ -231,7 +231,7 @@ watch(
                   :disabled="!isSomeRowsSelected"
                   :class="[
                     { 'bg-cool-gray': active },
-                    'flex items-center gap-1 w-full font-semibold rounded p-2',
+                    'flex items-center gap-1 w-full font-semibold rounded-md p-2',
                     `${!isSomeRowsSelected ? 'opacity-50' : ''}`,
                   ]"
                   type="button"
@@ -244,7 +244,7 @@ watch(
             </MenuItems>
           </transition>
         </Menu>
-        <button class="font-bold rounded py-1 px-2 bg-fill text-background hover:opacity-80">
+        <button class="font-semibold rounded-md py-1 px-2 bg-fill text-background hover:opacity-80">
           <RouterLink
             :to="{
               name: 'newProduct',

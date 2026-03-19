@@ -7,7 +7,7 @@ const { status } = defineProps<{
 <template>
   <div
     :class="[
-      'rounded border p-1 text-xs',
+      'rounded-md border p-1 text-xs',
       status
         ? 'border-blue-300 bg-blue-300 text-blue-900'
         : 'border-gray-300 bg-gray-300 text-gray-900',

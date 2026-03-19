@@ -22,9 +22,9 @@ const description = ref<string>('')
       <TitleAndDescription v-model:title="title" v-model:description="description" />
       <div class="m-auto">
         <RouterLink :to="{ name: 'collections' }">
-          <button class="bg-gray-300 rounded p-2 hover:bg-gray-300/70">Discard</button>
+          <button class="bg-gray-300 rounded-md p-2 hover:bg-gray-300/70">Discard</button>
         </RouterLink>
-        <button type="submit" class="bg-blue-300 rounded p-2 ml-2 hover:bg-blue-300/70">
+        <button type="submit" class="bg-blue-300 rounded-md p-2 ml-2 hover:bg-blue-300/70">
           Save
         </button>
       </div>

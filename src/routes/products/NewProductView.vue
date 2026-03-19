@@ -105,7 +105,7 @@ const columns = [
       <button
         type="button"
         aria-label="Edit variant"
-        class="p-1 rounded hover:bg-cool-gray"
+        class="p-1 rounded-md hover:bg-cool-gray"
         onClick={() => {
           activeEditVariant.value = props.row.original
           isEditVariantOpen.value = true
@@ -276,14 +276,14 @@ watch(
     <!-- Save changes or discard buttons -->
     <div class="col-start-3">
       <RouterLink :to="{ name: 'products' }">
-        <button class="font-semibold rounded bg-cool-gray py-1 px-2 hover:opacity-80">
+        <button class="font-semibold rounded-md bg-cool-gray py-1 px-2 hover:opacity-80">
           Discard
         </button>
       </RouterLink>
       <button
         type="submit"
         form="newProductForm"
-        class="font-bold rounded py-1 px-2 ml-2 bg-fill text-background hover:opacity-80"
+        class="font-bold rounded-md py-1 px-2 ml-2 bg-fill text-background hover:opacity-80"
       >
         Save
       </button>

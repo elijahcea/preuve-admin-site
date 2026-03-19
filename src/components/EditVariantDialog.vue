@@ -101,13 +101,13 @@ watch(
 
             <div class="flex justify-end gap-1 mt-3">
               <button
-                class="font-semibold rounded bg-cool-gray py-1 px-2 hover:opacity-80"
+                class="font-semibold rounded-md bg-cool-gray py-1 px-2 hover:opacity-80"
                 @click="emit('cancelEdit')"
               >
                 Cancel
               </button>
               <button
-                class="font-bold rounded py-1 px-2 ml-2 bg-fill text-background hover:opacity-80"
+                class="font-bold rounded-md py-1 px-2 ml-2 bg-fill text-background hover:opacity-80"
                 @click="emit('saveVariantEdit', { id: variantId, ...variantInfo })"
               >
                 Done
