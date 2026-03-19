@@ -12,6 +12,7 @@ import { ArrowLeftIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/24/o
 import { fetchCollection, fetchProducts } from '@/api/queries'
 import { useQuery } from '@tanstack/vue-query'
 import TitleAndDescription from '@/components/TitleAndDescription.vue'
+import { ElTag } from 'element-plus'
 
 const props = defineProps<{
   id: string
@@ -96,13 +97,9 @@ watch(
           >
             <template v-if="selectedProducts.length">
               <div class="flex gap-1 flex-wrap">
-                <div
-                  v-for="product in selectedProducts"
-                  :key="product.id"
-                  class="rounded-2xl border border-blue-900 bg-blue-100 max-w-xs p-1"
-                >
+                <el-tag v-for="product in selectedProducts" :key="product.id">
                   <p class="truncate">{{ product.title }}</p>
-                </div>
+                </el-tag>
               </div>
             </template>
             <p v-else>Select products</p>

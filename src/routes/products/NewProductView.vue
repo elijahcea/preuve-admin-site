@@ -33,7 +33,7 @@ import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-
 import PriceInput from '@/components/PriceInput.vue'
 import EditVariantDialog from '@/components/EditVariantDialog.vue'
 import PriceCell from '@/components/cells/PriceCell.vue'
-import { ElNotification } from 'element-plus'
+import { ElNotification, ElTag } from 'element-plus'
 
 const title = ref('')
 const description = ref('')
@@ -353,13 +353,9 @@ watch(
             class="relative border border-gray-300 rounded p-1 w-full flex items-center justify-between my-1"
           >
             <div v-if="selectedCollections.length" class="flex gap-1 flex-wrap">
-              <div
-                v-for="collection in selectedCollections"
-                :key="collection.id"
-                class="rounded-xl border border-blue-900 bg-blue-100 max-w-xs p-0.5"
-              >
+              <el-tag v-for="collection in selectedCollections" :key="collection.id">
                 <p class="truncate">{{ collection.title }}</p>
-              </div>
+              </el-tag>
             </div>
             <p v-else>Select collections</p>
             <span>
