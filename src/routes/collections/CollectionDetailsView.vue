@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   Listbox,
   ListboxButton,
@@ -30,8 +30,9 @@ const productsQuery = useQuery({
 
 const title = ref<string>('')
 const description = ref<string>('')
-const products = ref<ProductPreview[]>([])
 const selectedProducts = ref<ProductPreview[]>([])
+
+const products = computed(() => productsQuery.data.value?.products ?? [])
 
 watch(
   collectionQuery.isSuccess,
@@ -42,16 +43,7 @@ watch(
       title.value = collection.title
       description.value = collection.description
       selectedProducts.value = collection.products
-    }
-  },
-  { immediate: true },
-)
-
-watch(
-  productsQuery.isSuccess,
-  (isSuccess) => {
-    if (isSuccess && productsQuery.data.value) {
-      products.value = productsQuery.data.value.products
+      console.log(products.value)
     }
   },
   { immediate: true },
@@ -95,13 +87,11 @@ watch(
           <ListboxButton
             class="relative border border-gray-300 rounded p-2 w-full flex items-center justify-between my-1"
           >
-            <template v-if="selectedProducts.length">
-              <div class="flex gap-1 flex-wrap">
-                <el-tag v-for="product in selectedProducts" :key="product.id">
-                  <p class="truncate">{{ product.title }}</p>
-                </el-tag>
-              </div>
-            </template>
+            <div v-if="selectedProducts.length" class="flex gap-1 flex-wrap">
+              <el-tag v-for="product in selectedProducts" :key="product.id">
+                <p class="truncate">{{ product.title }}</p>
+              </el-tag>
+            </div>
             <p v-else>Select products</p>
             <span>
               <ChevronUpDownIcon class="size-5" aria-hidden="true" />

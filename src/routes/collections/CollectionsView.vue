@@ -9,7 +9,7 @@ import {
   getSortedRowModel,
   type RowSelectionState,
 } from '@tanstack/vue-table'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { type CollectionPreview } from '@/lib/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { fetchCollections } from '@/api/queries'
@@ -17,10 +17,10 @@ import { ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/
 import { deleteCollection } from '@/api/mutations'
 import { ElMessageBox, ElNotification } from 'element-plus'
 
-const tableData = ref<CollectionPreview[]>([])
 const rowSelection = ref<RowSelectionState>({})
 const isLoading = ref(false)
 
+const tableData = computed(() => queryData.value?.collections ?? [])
 const selectedRowId = computed(() => {
   const keys = Object.keys(rowSelection.value)
   return keys.length === 1 ? keys[0] : undefined
@@ -35,7 +35,6 @@ const {
   isPending,
   isError,
   data: queryData,
-  isSuccess,
   error,
 } = useQuery({
   queryKey: ['collections'],
@@ -109,9 +108,6 @@ const openConfirmPopover = () => {
 const revalidateCollections = async () => {
   try {
     await queryClient.invalidateQueries({ queryKey: ['collections'] }, { throwOnError: true })
-    if (queryData.value) {
-      tableData.value = queryData.value.collections
-    }
   } catch (e) {
     ElNotification({
       title: 'Error refetching collections',
@@ -168,16 +164,6 @@ const handleDeleteCollections = async () => {
     isLoading.value = false
   }
 }
-
-watch(
-  isSuccess,
-  (isSuccess) => {
-    if (isSuccess && queryData.value) {
-      tableData.value = queryData.value.collections
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>

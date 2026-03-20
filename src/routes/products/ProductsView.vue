@@ -10,17 +10,17 @@ import {
   getSortedRowModel,
   type RowSelectionState,
 } from '@tanstack/vue-table'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { fetchProducts } from '@/api/queries'
 import { ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { deleteProduct } from '@/api/mutations'
 import { ElMessageBox, ElNotification } from 'element-plus'
 
-const tableData = ref<ProductPreview[]>([])
 const rowSelection = ref<RowSelectionState>({})
 const isLoading = ref(false)
 
+const tableData = computed(() => queryData.value?.products ?? [])
 const selectedRowId = computed(() => {
   const keys = Object.keys(rowSelection.value)
   return keys.length === 1 ? keys[0] : undefined
@@ -35,7 +35,6 @@ const {
   isPending,
   isError,
   data: queryData,
-  isSuccess,
   error,
 } = useQuery({
   queryKey: ['products'],
@@ -113,9 +112,6 @@ const openConfirmPopover = () => {
 const revalidateProducts = async () => {
   try {
     await queryClient.invalidateQueries({ queryKey: ['products'] }, { throwOnError: true })
-    if (queryData.value) {
-      tableData.value = queryData.value.products
-    }
   } catch (e) {
     ElNotification({
       title: 'Error refetching products',
@@ -172,27 +168,17 @@ const handleDeleteProducts = async () => {
     isLoading.value = false
   }
 }
-
-watch(
-  isSuccess,
-  (isSuccess) => {
-    if (isSuccess && queryData.value) {
-      tableData.value = queryData.value.products
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>
   <div class="flex flex-col align-start gap-3">
     <div class="flex items-center justify-between">
-      <h1 class="text-xl font-bold">Products</h1>
+      <h1 class="text-xl font-semibold">Products</h1>
       <div class="flex gap-3">
         <Menu as="div" class="relative">
-          <MenuButton class="bg-cool-gray font-bold rounded py-1 px-2">
+          <MenuButton class="bg-cool-gray font-medium rounded py-1 px-2">
             <span>More actions</span>
-            <ChevronDownIcon class="size-5 inline-block font-bold ml-1" aria-hidden="true" />
+            <ChevronDownIcon class="size-5 inline-block ml-1" aria-hidden="true" />
           </MenuButton>
           <transition
             enter-active-class="transition duration-100 ease-out"
@@ -216,7 +202,7 @@ watch(
                   <button
                     :class="[
                       { 'bg-cool-gray': active },
-                      'flex items-center gap-1 w-full font-semibold rounded-md p-2',
+                      'flex items-center gap-1 w-full font-medium rounded-md p-2',
                       `${selectedRowId ?? 'opacity-50'}`,
                     ]"
                     type="button"
@@ -231,7 +217,7 @@ watch(
                   :disabled="!isSomeRowsSelected"
                   :class="[
                     { 'bg-cool-gray': active },
-                    'flex items-center gap-1 w-full font-semibold rounded-md p-2',
+                    'flex items-center gap-1 w-full font-medium rounded-md p-2',
                     `${!isSomeRowsSelected ? 'opacity-50' : ''}`,
                   ]"
                   type="button"
@@ -244,7 +230,7 @@ watch(
             </MenuItems>
           </transition>
         </Menu>
-        <button class="font-semibold rounded-md py-1 px-2 bg-fill text-background hover:opacity-80">
+        <button class="font-medium rounded-md py-1 px-2 bg-fill text-background hover:opacity-80">
           <RouterLink
             :to="{
               name: 'newProduct',
@@ -257,6 +243,11 @@ watch(
     </div>
     <div v-if="isPending">Loading...</div>
     <div v-else-if="isError">An error has occured: {{ error }}</div>
-    <TableComponent v-else-if="queryData" :table="table" :is-loading="isLoading" />
+    <div
+      v-else-if="queryData"
+      class="bg-light outline outline-gray-200 rounded-xl shadow overflow-hidden"
+    >
+      <TableComponent :table="table" :is-loading="isLoading" :include-headers="true" />
+    </div>
   </div>
 </template>
