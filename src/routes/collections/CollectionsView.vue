@@ -253,6 +253,11 @@ watch(
     </div>
     <div v-if="isPending">Loading...</div>
     <div v-else-if="isError">Something went wrong: {{ error }}</div>
-    <TableComponent v-else-if="queryData" :table="table" :is-loading="isLoading" />
+    <div
+      v-else-if="queryData"
+      class="bg-light outline outline-gray-200 rounded-xl shadow overflow-hidden"
+    >
+      <TableComponent :table="table" :is-loading="isLoading" :include-headers="true" />
+    </div>
   </div>
 </template>

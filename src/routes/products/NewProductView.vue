@@ -455,7 +455,9 @@ watch(
               @save-variant-edit="saveVariantEdit"
               @cancel-edit="cancelVariantEdit"
             />
-            <TableComponent :table="variantsTable" :is-loading="false" />
+            <div class="bg-light outline outline-gray-200 rounded-xl shadow overflow-hidden">
+              <TableComponent :table="variantsTable" :is-loading="false" :include-headers="true" />
+            </div>
           </section>
         </Transition>
       </form>
