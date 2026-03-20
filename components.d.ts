@@ -18,6 +18,7 @@ declare module 'vue' {
     CreateProductOptionPanel: typeof import('./src/components/CreateProductOptionPanel.vue')['default']
     CreateProductOptionsPanel: typeof import('./src/components/CreateProductOptionsPanel.vue')['default']
     EditVariantDialog: typeof import('./src/components/EditVariantDialog.vue')['default']
+    ElTag: typeof import('element-plus/es')['ElTag']
     HeaderComponent: typeof import('./src/components/HeaderComponent.vue')['default']
     InventoryPanel: typeof import('./src/components/InventoryPanel.vue')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
@@ -29,6 +30,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     StatusLabel: typeof import('./src/components/StatusLabel.vue')['default']
     TableComponent: typeof import('./src/components/TableComponent.vue')['default']
+    TagCell: typeof import('./src/components/cells/TagCell.vue')['default']
     TitleAndDescription: typeof import('./src/components/TitleAndDescription.vue')['default']
   }
   export interface GlobalDirectives {
@@ -44,6 +46,7 @@ declare global {
   const CreateProductOptionPanel: typeof import('./src/components/CreateProductOptionPanel.vue')['default']
   const CreateProductOptionsPanel: typeof import('./src/components/CreateProductOptionsPanel.vue')['default']
   const EditVariantDialog: typeof import('./src/components/EditVariantDialog.vue')['default']
+  const ElTag: typeof import('element-plus/es')['ElTag']
   const HeaderComponent: typeof import('./src/components/HeaderComponent.vue')['default']
   const InventoryPanel: typeof import('./src/components/InventoryPanel.vue')['default']
   const NavBar: typeof import('./src/components/NavBar.vue')['default']
@@ -55,5 +58,6 @@ declare global {
   const RouterView: typeof import('vue-router')['RouterView']
   const StatusLabel: typeof import('./src/components/StatusLabel.vue')['default']
   const TableComponent: typeof import('./src/components/TableComponent.vue')['default']
+  const TagCell: typeof import('./src/components/cells/TagCell.vue')['default']
   const TitleAndDescription: typeof import('./src/components/TitleAndDescription.vue')['default']
 }
