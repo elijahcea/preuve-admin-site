@@ -16,6 +16,7 @@ import { fetchProducts } from '@/api/queries'
 import { ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { deleteProduct } from '@/api/mutations'
 import { ElMessageBox, ElNotification } from 'element-plus'
+import { RouterLink } from 'vue-router'
 
 const rowSelection = ref<RowSelectionState>({})
 const isLoading = ref(false)
@@ -66,6 +67,13 @@ const columns = [
   columnHelper.accessor('title', {
     header: 'Product',
     sortingFn: 'alphanumeric',
+    cell: (props) => (
+      <button type="button" class="w-full text-start">
+        <RouterLink to={{ name: 'productDetails', params: { id: props.row.id } }}>
+          {props.getValue()}
+        </RouterLink>
+      </button>
+    ),
   }),
   columnHelper.accessor('status', {
     header: 'Status',
