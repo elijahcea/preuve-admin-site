@@ -1,18 +1,13 @@
 <script setup lang="ts">
+import { ElTag } from 'element-plus'
+
 const { status } = defineProps<{
   status: boolean
 }>()
 </script>
 
 <template>
-  <div
-    :class="[
-      'rounded-md border p-1 text-xs',
-      status
-        ? 'border-blue-300 bg-blue-300 text-blue-900'
-        : 'border-gray-300 bg-gray-300 text-gray-900',
-    ]"
-  >
+  <el-tag effect="dark" :type="status ? 'primary' : 'info'">
     {{ status ? 'Active' : 'Draft' }}
-  </div>
+  </el-tag>
 </template>
