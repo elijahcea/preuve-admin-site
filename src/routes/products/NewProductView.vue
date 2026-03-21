@@ -444,7 +444,10 @@ watch(
 
         <!-- Variants table -->
         <Transition name="fade">
-          <section v-if="validOptions.length">
+          <section
+            v-if="validOptions.length"
+            class="bg-light outline outline-gray-200 rounded-xl shadow overflow-hidden"
+          >
             <EditVariantDialog
               v-model:is-open="isEditVariantOpen"
               :currency-symbol="currencyInfo.symbol"
@@ -455,9 +458,7 @@ watch(
               @save-variant-edit="saveVariantEdit"
               @cancel-edit="cancelVariantEdit"
             />
-            <div class="bg-light outline outline-gray-200 rounded-xl shadow overflow-hidden">
-              <TableComponent :table="variantsTable" :is-loading="false" :include-headers="true" />
-            </div>
+            <TableComponent :table="variantsTable" :is-loading="false" :include-headers="true" />
           </section>
         </Transition>
       </form>
