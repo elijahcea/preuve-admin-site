@@ -184,7 +184,7 @@ const handleDeleteProducts = async () => {
       <h1 class="text-xl font-semibold">Products</h1>
       <div class="flex gap-3">
         <Menu as="div" class="relative">
-          <MenuButton class="bg-cool-gray font-medium rounded py-1 px-2">
+          <MenuButton class="bg-light outline outline-gray-200 font-medium rounded-md py-1 px-2">
             <span>More actions</span>
             <ChevronDownIcon class="size-5 inline-block ml-1" aria-hidden="true" />
           </MenuButton>
@@ -197,9 +197,9 @@ const handleDeleteProducts = async () => {
             leave-to-class="transform scale-95 opacity-0"
           >
             <MenuItems
-              class="absolute p-1 mt-0.5 w-full rounded bg-white shadow-lg divide-y divide-gray-100"
+              class="absolute mt-0.5 w-full rounded-md bg-white shadow-lg divide-y divide-gray-100"
             >
-              <MenuItem as="div" v-slot="{ active }" :disabled="!selectedRowId">
+              <MenuItem as="div" class="p-1" v-slot="{ active }" :disabled="!selectedRowId">
                 <component
                   :is="selectedRowId ? 'RouterLink' : 'span'"
                   :to="{
@@ -220,7 +220,7 @@ const handleDeleteProducts = async () => {
                   </button>
                 </component>
               </MenuItem>
-              <MenuItem as="div" v-slot="{ active }" :disabled="!isSomeRowsSelected">
+              <MenuItem as="div" class="p-1" v-slot="{ active }" :disabled="!isSomeRowsSelected">
                 <button
                   :disabled="!isSomeRowsSelected"
                   :class="[
