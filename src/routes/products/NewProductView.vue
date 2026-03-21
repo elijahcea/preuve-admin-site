@@ -48,11 +48,14 @@ const defaultVariant = ref({
 const options = ref<OptionCreateForm[]>([])
 const variants = ref<ProductVariantCreateForm[]>([])
 const isEditVariantOpen = ref(false)
-const activeEditVariant = ref<ProductVariantCreateForm>()
+const activeEditVariantId = ref()
 const isLoading = ref(false)
 
 const validOptions = computed(() =>
   options.value.filter((option) => option.values.some((value) => value.name.length)),
+)
+const activeEditVariant = computed(() =>
+  variants.value.find((v) => v.id === activeEditVariantId.value),
 )
 
 const queryClient = useQueryClient()
@@ -107,7 +110,7 @@ const columns = [
         aria-label="Edit variant"
         class="p-1 rounded-md hover:bg-cool-gray"
         onClick={() => {
-          activeEditVariant.value = props.row.original
+          activeEditVariantId.value = props.row.id
           isEditVariantOpen.value = true
         }}
       >
@@ -137,12 +140,12 @@ const saveVariantEdit = (updatedVariantInfo: Omit<ProductVariantCreateForm, 'opt
   newVariantsArr.splice(existingVariantIdx, 1, updatedVariant)
 
   variants.value = newVariantsArr
-  activeEditVariant.value = undefined
+  activeEditVariantId.value = undefined
   isEditVariantOpen.value = false
 }
 
 const cancelVariantEdit = () => {
-  activeEditVariant.value = undefined
+  activeEditVariantId.value = undefined
   isEditVariantOpen.value = false
 }
 
