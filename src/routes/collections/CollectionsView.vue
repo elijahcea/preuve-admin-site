@@ -187,7 +187,7 @@ const handleDeleteCollections = async () => {
             <MenuItems
               class="absolute p-1 mt-0.5 w-full rounded bg-white shadow-lg divide-y divide-gray-100"
             >
-              <MenuItem v-slot="{ active }" :disabled="!selectedRowId">
+              <MenuItem as="div" v-slot="{ active }" :disabled="!selectedRowId">
                 <component
                   :is="selectedRowId ? 'RouterLink' : 'span'"
                   :to="{
@@ -208,7 +208,7 @@ const handleDeleteCollections = async () => {
                   </button>
                 </component>
               </MenuItem>
-              <MenuItem v-slot="{ active }" :disabled="!isSomeRowsSelected">
+              <MenuItem as="div" v-slot="{ active }" :disabled="!isSomeRowsSelected">
                 <button
                   :disabled="!isSomeRowsSelected"
                   :class="[
