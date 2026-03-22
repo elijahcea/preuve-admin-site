@@ -251,11 +251,10 @@ const handleDeleteProducts = async () => {
     </div>
     <div v-if="isPending">Loading...</div>
     <div v-else-if="isError">An error has occured: {{ error }}</div>
-    <div
-      v-else-if="queryData"
-      class="bg-light outline outline-gray-200 rounded-xl shadow overflow-hidden"
-    >
-      <TableComponent :table="table" :is-loading="isLoading" :include-headers="true" />
+    <div v-else-if="queryData" class="bg-light outline outline-gray-200 rounded-xl shadow">
+      <div>
+        <TableComponent :table="table" :is-loading="isLoading" :include-headers="true" />
+      </div>
     </div>
   </div>
 </template>
