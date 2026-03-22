@@ -9,7 +9,6 @@ const {
 </script>
 
 <template>
-  <!--<div class="border border-gray-200 rounded-xl shadow overflow-hidden">-->
   <table
     v-loading="isLoading"
     class="bg-inherit min-w-full border-collapse table-auto divide-y divide-gray-200"
@@ -41,7 +40,6 @@ const {
       </tr>
     </tbody>
   </table>
-  <!--</div>-->
 </template>
 
 <style lang="css" scoped>
