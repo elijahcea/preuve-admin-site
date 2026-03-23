@@ -31,7 +31,7 @@ import { postNewProduct } from '@/api/mutations'
 import router from '@/router'
 import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-table'
 import PriceInput from '@/components/PriceInput.vue'
-import EditVariantDialog from '@/components/EditVariantDialog.vue'
+import EditVariantDialog from '@/components/dialogs/EditVariantDialog.vue'
 import PriceCell from '@/components/cells/PriceCell.vue'
 import { ElNotification, ElTag } from 'element-plus'
 
