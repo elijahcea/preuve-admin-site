@@ -14,7 +14,7 @@ const handleLogout = () => {
 
 <template>
   <button
-    @click="handleLogout"
+    @click.prevent="handleLogout"
     :disabled="isLoading"
     v-loading="isLoading"
     class="bg-fill rounded-md p-2 hover:bg-fill/50 text-sm"

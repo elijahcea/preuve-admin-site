@@ -8,7 +8,7 @@ const login = () => loginWithRedirect()
 <template>
   <button
     type="button"
-    @click="login"
+    @click.prevent="login"
     :disabled="isLoading"
     v-loading="isLoading"
     class="bg-fill rounded-md p-2 hover:bg-fill/50 text-sm"
