@@ -8,6 +8,7 @@ const description = defineModel<string>('description', { required: true })
     <div>
       <label for="title">Title</label>
       <input
+        required
         id="title"
         type="text"
         class="border border-gray-300 rounded p-1 w-full mt-1"
