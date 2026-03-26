@@ -17,6 +17,9 @@ import { ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/
 import { deleteProduct } from '@/api/mutations'
 import { ElMessageBox, ElNotification } from 'element-plus'
 import { RouterLink } from 'vue-router'
+import { useAuth0 } from '@auth0/auth0-vue'
+
+const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
 const rowSelection = ref<RowSelectionState>({})
 const isLoading = ref(false)
@@ -43,7 +46,8 @@ const {
 })
 
 const deleteProductMutation = useMutation({
-  mutationFn: (productId: string) => deleteProduct(productId),
+  mutationFn: ({ token, productId }: { token: string; productId: string }) =>
+    deleteProduct(token, productId),
 })
 
 const columns = [
@@ -131,49 +135,66 @@ const revalidateProducts = async () => {
 }
 
 const handleDeleteProducts = async () => {
-  try {
-    isLoading.value = true
+  if (isAuthenticated.value) {
+    try {
+      isLoading.value = true
 
-    const productIds = Object.keys(rowSelection.value)
-    const results = await Promise.allSettled(
-      productIds.map((id) => {
-        return deleteProductMutation.mutateAsync(id)
-      }),
-    )
+      const token = await getAccessTokenSilently()
 
-    const rejectedPromises = results.filter((promise) => promise.status === 'rejected')
+      const productIds = Object.keys(rowSelection.value)
+      const results = await Promise.allSettled(
+        productIds.map((id) => {
+          return deleteProductMutation.mutateAsync({ token, productId: id })
+        }),
+      )
 
-    if (rejectedPromises.length) {
+      const rejectedPromises = results.filter((promise) => promise.status === 'rejected')
+
+      if (rejectedPromises.length) {
+        ElNotification({
+          title: 'Error deleting products',
+          message:
+            rejectedPromises.length > 1
+              ? `Failed to delete ${rejectedPromises.length} products`
+              : `Failed to delete ${rejectedPromises.length} product`,
+          type: 'error',
+          position: 'bottom-right',
+        })
+      } else {
+        ElNotification({
+          title: 'Success',
+          message: `Successfully deleted products`,
+          type: 'success',
+          position: 'bottom-right',
+        })
+      }
+
+      await revalidateProducts()
+
+      table.resetRowSelection(true)
+      isLoading.value = false
+    } catch (e) {
+      console.log(e)
       ElNotification({
         title: 'Error deleting products',
-        message:
-          rejectedPromises.length > 1
-            ? `Failed to delete ${rejectedPromises.length} products`
-            : `Failed to delete ${rejectedPromises.length} product`,
         type: 'error',
         position: 'bottom-right',
       })
-    } else {
-      ElNotification({
-        title: 'Success',
-        message: `Successfully deleted products`,
-        type: 'success',
-        position: 'bottom-right',
-      })
+      isLoading.value = false
     }
-
-    await revalidateProducts()
-
-    table.resetRowSelection(true)
-    isLoading.value = false
-  } catch (e) {
-    console.log(e)
-    ElNotification({
-      title: 'Error deleting products',
-      type: 'error',
-      position: 'bottom-right',
+  } else {
+    ElMessageBox({
+      title: 'Login Required',
+      message: 'Authentication is required for this action. Please login to continue.',
+      showCancelButton: true,
+      confirmButtonText: 'Log In',
     })
-    isLoading.value = false
+      .then((action) => {
+        if (action === 'confirm') {
+          loginWithRedirect()
+        }
+      })
+      .catch()
   }
 }
 </script>

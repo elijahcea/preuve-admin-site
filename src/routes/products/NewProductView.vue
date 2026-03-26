@@ -33,7 +33,10 @@ import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-
 import PriceInput from '@/components/PriceInput.vue'
 import EditVariantDialog from '@/components/dialogs/EditVariantDialog.vue'
 import PriceCell from '@/components/cells/PriceCell.vue'
-import { ElNotification, ElTag } from 'element-plus'
+import { ElNotification, ElTag, ElMessageBox } from 'element-plus'
+import { useAuth0 } from '@auth0/auth0-vue'
+
+const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
 const title = ref('')
 const description = ref('')
@@ -73,7 +76,8 @@ const {
 })
 
 const newProductMutation = useMutation({
-  mutationFn: (newProduct: ProductCreateDTO) => postNewProduct(newProduct),
+  mutationFn: ({ token, newProduct }: { token: string; newProduct: ProductCreateDTO }) =>
+    postNewProduct(token, newProduct),
   onSuccess: (data) => {
     const { product } = data
     router.push({ name: 'productDetails', params: { id: product.id } })
@@ -163,91 +167,115 @@ const revalidateProducts = async () => {
 }
 
 const handleSubmit = async () => {
-  try {
-    isLoading.value = true
-    if (options.value.length < 1) {
-      if (!defaultVariant.value.price || !defaultVariant.value.quantity) {
-        throw new Error(`Missing input for price and/or quantity.`)
-      }
-      await newProductMutation.mutate({
-        status: productStatus.value,
-        title: title.value,
-        description: description.value,
-        featuredImage: null,
-        collectionIds: selectedCollections.value.map((collection) => collection.id),
-        options: [
-          {
-            name: 'Default option',
-            values: [
+  if (isAuthenticated.value) {
+    try {
+      isLoading.value = true
+
+      const token = await getAccessTokenSilently()
+
+      if (options.value.length < 1) {
+        if (!defaultVariant.value.price || !defaultVariant.value.quantity) {
+          throw new Error(`Missing input for price and/or quantity.`)
+        }
+        await newProductMutation.mutate({
+          token,
+          newProduct: {
+            status: productStatus.value,
+            title: title.value,
+            description: description.value,
+            featuredImage: null,
+            collectionIds: selectedCollections.value.map((collection) => collection.id),
+            options: [
               {
-                name: 'Default option value',
+                name: 'Default option',
+                values: [
+                  {
+                    name: 'Default option value',
+                  },
+                ],
+              },
+            ],
+            variants: [
+              {
+                sku: defaultVariant.value.sku,
+                price: defaultVariant.value.price,
+                inventoryQuantity: defaultVariant.value.quantity,
+                optionValues: [
+                  {
+                    name: 'Default option value',
+                    optionName: 'Default option',
+                  },
+                ],
               },
             ],
           },
-        ],
-        variants: [
-          {
-            sku: defaultVariant.value.sku,
-            price: defaultVariant.value.price,
-            inventoryQuantity: defaultVariant.value.quantity,
-            optionValues: [
-              {
-                name: 'Default option value',
-                optionName: 'Default option',
-              },
-            ],
-          },
-        ],
-      })
-    } else {
-      await newProductMutation.mutate({
-        status: productStatus.value,
-        title: title.value,
-        description: description.value,
-        featuredImage: null,
-        collectionIds: selectedCollections.value.map((collection) => collection.id),
-        options: options.value.map((option) => ({
-          name: option.name,
-          values: option.values.map((value) => ({
-            name: value.name,
-          })),
-        })),
-        variants: variants.value.map((variant) => {
-          return {
-            sku: variant.sku,
-            price: variant.price,
-            inventoryQuantity: variant.inventoryQuantity,
-            optionValues: variant.optionValues.map((value) => {
-              const parentOption = options.value.find((option) => option.id === value.optionId)
-              if (!parentOption) throw new Error('Option value requires parent option name')
-              return {
+        })
+      } else {
+        await newProductMutation.mutate({
+          token,
+          newProduct: {
+            status: productStatus.value,
+            title: title.value,
+            description: description.value,
+            featuredImage: null,
+            collectionIds: selectedCollections.value.map((collection) => collection.id),
+            options: options.value.map((option) => ({
+              name: option.name,
+              values: option.values.map((value) => ({
                 name: value.name,
-                optionName: parentOption.name,
+              })),
+            })),
+            variants: variants.value.map((variant) => {
+              return {
+                sku: variant.sku,
+                price: variant.price,
+                inventoryQuantity: variant.inventoryQuantity,
+                optionValues: variant.optionValues.map((value) => {
+                  const parentOption = options.value.find((option) => option.id === value.optionId)
+                  if (!parentOption) throw new Error('Option value requires parent option name')
+                  return {
+                    name: value.name,
+                    optionName: parentOption.name,
+                  }
+                }),
               }
             }),
-          }
-        }),
+          },
+        })
+      }
+
+      await revalidateProducts()
+
+      ElNotification({
+        title: 'Success',
+        message: `Successfully created product: ${title.value}`,
+        type: 'success',
+        position: 'bottom-right',
       })
+
+      isLoading.value = false
+    } catch (e) {
+      console.log(e)
+      ElNotification({
+        title: `Error creating product: ${title.value}`,
+        type: 'error',
+        position: 'bottom-right',
+      })
+      isLoading.value = false
     }
-
-    await revalidateProducts()
-
-    ElNotification({
-      title: 'Success',
-      message: `Successfully created product: ${title.value}`,
-      type: 'success',
-      position: 'bottom-right',
+  } else {
+    ElMessageBox({
+      title: 'Login Required',
+      message: 'Authentication is required for this action. Please login to continue.',
+      showCancelButton: true,
+      confirmButtonText: 'Log In',
     })
-
-    isLoading.value = false
-  } catch (e) {
-    console.log(e)
-    ElNotification({
-      title: `Error creating product: ${title.value}`,
-      type: 'error',
-      position: 'bottom-right',
-    })
-    isLoading.value = false
+      .then((action) => {
+        if (action === 'confirm') {
+          loginWithRedirect()
+        }
+      })
+      .catch()
   }
 }
 

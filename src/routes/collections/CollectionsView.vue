@@ -16,6 +16,9 @@ import { fetchCollections } from '@/api/queries'
 import { ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { deleteCollection } from '@/api/mutations'
 import { ElMessageBox, ElNotification } from 'element-plus'
+import { useAuth0 } from '@auth0/auth0-vue'
+
+const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
 const rowSelection = ref<RowSelectionState>({})
 const isLoading = ref(false)
@@ -42,7 +45,8 @@ const {
 })
 
 const deleteCollectionMutation = useMutation({
-  mutationFn: (collectionId: string) => deleteCollection(collectionId),
+  mutationFn: ({ token, collectionId }: { token: string; collectionId: string }) =>
+    deleteCollection(token, collectionId),
 })
 
 const columns = [
@@ -119,49 +123,66 @@ const revalidateCollections = async () => {
 }
 
 const handleDeleteCollections = async () => {
-  try {
-    isLoading.value = true
+  if (isAuthenticated.value) {
+    try {
+      isLoading.value = true
 
-    const collectionIds = Object.keys(rowSelection.value)
-    const results = await Promise.allSettled(
-      collectionIds.map((id) => {
-        return deleteCollectionMutation.mutateAsync(id)
-      }),
-    )
+      const token = await getAccessTokenSilently()
 
-    const rejectedPromises = results.filter((promise) => promise.status === 'rejected')
+      const collectionIds = Object.keys(rowSelection.value)
+      const results = await Promise.allSettled(
+        collectionIds.map((id) => {
+          return deleteCollectionMutation.mutateAsync({ token, collectionId: id })
+        }),
+      )
 
-    if (rejectedPromises.length) {
+      const rejectedPromises = results.filter((promise) => promise.status === 'rejected')
+
+      if (rejectedPromises.length) {
+        ElNotification({
+          title: 'Error deleting collections',
+          message:
+            rejectedPromises.length > 1
+              ? `Failed to delete ${rejectedPromises.length} collections`
+              : `Failed to delete ${rejectedPromises.length} collection`,
+          type: 'error',
+          position: 'bottom-right',
+        })
+      } else {
+        ElNotification({
+          title: 'Success',
+          message: `Successfully deleted collections`,
+          type: 'success',
+          position: 'bottom-right',
+        })
+      }
+
+      await revalidateCollections()
+
+      table.resetRowSelection(true)
+      isLoading.value = false
+    } catch (e) {
+      console.log(e)
       ElNotification({
-        title: 'Error deleting collections',
-        message:
-          rejectedPromises.length > 1
-            ? `Failed to delete ${rejectedPromises.length} collections`
-            : `Failed to delete ${rejectedPromises.length} collection`,
+        title: `Error deleting collections`,
         type: 'error',
         position: 'bottom-right',
       })
-    } else {
-      ElNotification({
-        title: 'Success',
-        message: `Successfully deleted collections`,
-        type: 'success',
-        position: 'bottom-right',
-      })
+      isLoading.value = false
     }
-
-    await revalidateCollections()
-
-    table.resetRowSelection(true)
-    isLoading.value = false
-  } catch (e) {
-    console.log(e)
-    ElNotification({
-      title: `Error deleting collections`,
-      type: 'error',
-      position: 'bottom-right',
+  } else {
+    ElMessageBox({
+      title: 'Login Required',
+      message: 'Authentication is required for this action. Please login to continue.',
+      showCancelButton: true,
+      confirmButtonText: 'Log In',
     })
-    isLoading.value = false
+      .then((action) => {
+        if (action === 'confirm') {
+          loginWithRedirect()
+        }
+      })
+      .catch()
   }
 }
 </script>
