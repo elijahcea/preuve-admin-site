@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import LoginButton from './LoginButton.vue'
+import { useAuth0 } from '@auth0/auth0-vue'
+import ProfileMenu from './ProfileMenu.vue'
+
+const { isAuthenticated } = useAuth0()
 </script>
 
 <template>
@@ -9,7 +14,8 @@ import { BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
         <BuildingStorefrontIcon class="size-5" />
         <RouterLink :to="{ name: 'home' }">Preuve Admin</RouterLink>
       </div>
-      <button class="bg-fill rounded-md p-2 hover:bg-fill/70 text-sm">Login</button>
+      <ProfileMenu v-if="isAuthenticated" />
+      <LoginButton v-else />
     </nav>
   </header>
 </template>
