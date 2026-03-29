@@ -9,13 +9,8 @@ export type ProductOptionValue = {
   id: string
   position: number
   name: string
+  optionName: string
   optionId: string
-}
-
-export type SelectedOption = {
-  name: string
-  value: string
-  optionValueId: string
 }
 
 export type ProductVariant = {
@@ -29,7 +24,7 @@ export type ProductVariant = {
   createdAt: Date
   updatedAt: Date
 
-  selectedOptions: SelectedOption[]
+  selectedValues: ProductOptionValue[]
 }
 
 export type Product = {
@@ -77,7 +72,7 @@ export type Merchandise = {
   price: number
   image: Image | null
   href: string
-  selectedOptions: SelectedOption[]
+  selectedValues: ProductOptionValue[]
 }
 
 export type Image = {
@@ -167,7 +162,6 @@ export type OptionUpdateInput = OptionUpdateDTO & {
 export type OptionValueUpdateInput = {
   id?: string
   name: string
-  optionName: string
 }
 
 export interface ProductVariantUpdateDTO {
