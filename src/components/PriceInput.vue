@@ -21,6 +21,7 @@ const handlePriceChange = (e: Event) => {
       required
       v-model="price"
       :id="inputId"
+      :name="inputId"
       placeholder="0.00"
       type="number"
       min="0.01"
