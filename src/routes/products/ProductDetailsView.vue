@@ -1,58 +1,80 @@
 <script setup lang="tsx">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { currencyInfo } from '@/lib/currencyInfo'
-import {
-  Listbox,
-  ListboxButton,
-  ListboxLabel,
-  ListboxOption,
-  ListboxOptions,
-} from '@headlessui/vue'
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  ChevronUpDownIcon,
-  EllipsisHorizontalIcon,
-  PencilSquareIcon,
-} from '@heroicons/vue/24/outline'
-import { useMutation, useQuery } from '@tanstack/vue-query'
+import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { fetchCollections, fetchProduct } from '@/api/queries'
 import StatusLabel from '@/components/StatusLabel.vue'
 import {
   type ProductVariant,
-  type CollectionPreview,
   type ProductOption,
   type ProductUpdateDTO,
+  type OptionUpdateDTO,
+  type ProductVariantUpdateDTO,
 } from '@/lib/types'
 import router from '@/router'
-import { updateProduct } from '@/api/mutations'
+import { updateOption, updateProduct, updateVariant } from '@/api/mutations'
 import { ElTag } from 'element-plus'
 import { createColumnHelper, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import TableComponent from '@/components/TableComponent.vue'
 import TagCell from '@/components/cells/TagCell.vue'
 import PriceCell from '@/components/cells/PriceCell.vue'
+import ItemActions from '@/components/ItemActions.vue'
+import EditVariantDialog from '@/components/dialogs/EditVariantDialog.vue'
+import EditProductDialog from '@/components/dialogs/EditProductDialog.vue'
+import EditOptionDialog from '@/components/dialogs/EditOptionDialog.vue'
+import { ElMessageBox, ElNotification } from 'element-plus'
+import { useAuth0 } from '@auth0/auth0-vue'
+import EditStatusDialog from '@/components/dialogs/EditStatusDialog.vue'
+import EditProductCollectionsDialog from '@/components/dialogs/EditProductCollectionsDialog.vue'
+
+type ProductUpdatePayload = {
+  action: 'update:product'
+  data: ProductUpdateDTO
+}
+type OptionUpdatePayload = {
+  action: 'update:option'
+  data: OptionUpdateDTO & { optionId: string }
+}
+
+type VariantUpdatePayload = {
+  action: 'update:variant'
+  data: ProductVariantUpdateDTO & { variantId: string }
+}
 
 const props = defineProps<{
   id: string
 }>()
 
-const title = ref('')
-const description = ref('')
-const selectedCollections = ref<CollectionPreview[]>([])
-const productStatus = ref(false)
-const hasOnlyDefaultVariant = ref(true)
+const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
+
+const isLoading = ref(false)
+const activeEditOptionId = ref()
 const activeEditVariantId = ref()
+const isEditProductOpen = ref(false)
+const isEditStatusOpen = ref(false)
+const isEditCollectionsOpen = ref(false)
+const isEditOptionOpen = ref(false)
 const isEditVariantOpen = ref(false)
 
-const optionsTableData = computed(() => productQuery.data.value?.product.options ?? [])
-const variantsTableData = computed(() => productQuery.data.value?.product.variants ?? [])
+const productStatus = computed(() => productQuery.data.value?.product.status ?? false)
+const title = computed(() => productQuery.data.value?.product.title ?? '')
+const description = computed(() => productQuery.data.value?.product.description ?? '')
+const options = computed(() => productQuery.data.value?.product.options ?? [])
+const variants = computed(() => productQuery.data.value?.product.variants ?? [])
 const collections = computed(() => collectionsQuery.data.value?.collections ?? [])
+const selectedCollections = computed(() => productQuery.data.value?.product.collections ?? [])
+const activeEditOption = computed(() =>
+  options.value.find((o) => o.id === activeEditOptionId.value),
+)
 const activeEditVariant = computed(() =>
-  variantsTableData.value.find((v) => v.id === activeEditVariantId.value),
+  variants.value.find((v) => v.id === activeEditVariantId.value),
 )
 
 const optionColumnHelper = createColumnHelper<ProductOption>()
 const variantColumnHelper = createColumnHelper<ProductVariant>()
+
+const queryClient = useQueryClient()
 
 const productQuery = useQuery({
   queryKey: ['products', () => props.id],
@@ -65,11 +87,36 @@ const collectionsQuery = useQuery({
 })
 
 const updateProductMutation = useMutation({
-  mutationFn: (updatedProduct: ProductUpdateDTO) => updateProduct(props.id, updatedProduct),
+  mutationFn: ({ token, updatedProduct }: { token: string; updatedProduct: ProductUpdateDTO }) =>
+    updateProduct(token, props.id, updatedProduct),
   onSuccess: (data) => {
     const { product } = data
     router.push({ name: 'productDetails', params: { id: product.id } })
   },
+})
+
+const updateOptionMutation = useMutation({
+  mutationFn: ({
+    token,
+    optionId,
+    updatedOption,
+  }: {
+    token: string
+    optionId: string
+    updatedOption: OptionUpdateDTO
+  }) => updateOption(token, props.id, optionId, updatedOption),
+})
+
+const updateVariantMutation = useMutation({
+  mutationFn: ({
+    token,
+    variantId,
+    updatedVariant,
+  }: {
+    token: string
+    variantId: string
+    updatedVariant: ProductVariantUpdateDTO
+  }) => updateVariant(token, props.id, variantId, updatedVariant),
 })
 
 const optionColumns = [
@@ -93,21 +140,22 @@ const optionColumns = [
     id: 'actions',
     cell: (props) => (
       <div class="text-end">
-        <button type="button" class="rounded-md py-1 px-2 hover:bg-cool-gray">
-          <EllipsisHorizontalIcon class="size-5" />
-        </button>
+        <ItemActions
+          itemId={props.row.id}
+          onEditItem={() => {
+            activeEditOptionId.value = props.row.id
+            isEditOptionOpen.value = true
+          }}
+        />
       </div>
     ),
   }),
 ]
 
 const variantColumns = [
-  variantColumnHelper.accessor(
-    (row) => row.selectedOptions.map((value) => value.name).join(' / '),
-    {
-      header: 'Title',
-    },
-  ),
+  variantColumnHelper.accessor((row) => row.selectedValues.map((value) => value.name).join(' / '), {
+    header: 'Title',
+  }),
   variantColumnHelper.accessor('sku', {
     header: 'SKU',
   }),
@@ -130,9 +178,13 @@ const variantColumns = [
     id: 'actions',
     cell: (props) => (
       <div class="text-end">
-        <button type="button" class="rounded-md py-1 px-2 hover:bg-cool-gray">
-          <EllipsisHorizontalIcon class="size-5" />
-        </button>
+        <ItemActions
+          itemId={props.row.id}
+          onEditItem={() => {
+            activeEditVariantId.value = props.row.id
+            isEditVariantOpen.value = true
+          }}
+        />
       </div>
     ),
   }),
@@ -140,7 +192,7 @@ const variantColumns = [
 
 const optionTable = useVueTable({
   columns: optionColumns,
-  data: optionsTableData,
+  data: options,
   enableSorting: false,
   getRowId: (row) => row.id,
   getCoreRowModel: getCoreRowModel(),
@@ -148,28 +200,99 @@ const optionTable = useVueTable({
 
 const variantsTable = useVueTable({
   columns: variantColumns,
-  data: variantsTableData,
+  data: variants,
   getRowId: (row) => row.id,
   getCoreRowModel: getCoreRowModel(),
 })
 
-const handleSubmit = () => {}
+const revalidateProduct = async () => {
+  try {
+    await queryClient.invalidateQueries({ queryKey: ['products', () => props.id] })
+  } catch (e) {
+    ElNotification({
+      title: 'Error refetching product',
+      message: `${e}`,
+      type: 'error',
+      position: 'bottom-right',
+    })
+  }
+}
 
-watch(
-  productQuery.isSuccess,
-  (isSuccess) => {
-    if (isSuccess && productQuery.data.value) {
-      const product = productQuery.data.value.product
+const handleSubmit = async (
+  payload: ProductUpdatePayload | OptionUpdatePayload | VariantUpdatePayload,
+) => {
+  console.log(payload)
+  if (isAuthenticated.value) {
+    try {
+      switch (payload.action) {
+        case 'update:product': {
+          isLoading.value = true
 
-      title.value = product.title
-      description.value = product.description
-      selectedCollections.value = product.collections
-      productStatus.value = product.status
-      hasOnlyDefaultVariant.value = product.hasOnlyDefaultVariant
+          const token = await getAccessTokenSilently()
+
+          await updateProductMutation.mutate({ token, updatedProduct: payload.data })
+          break
+        }
+        case 'update:option': {
+          isLoading.value = true
+
+          const token = await getAccessTokenSilently()
+
+          await updateOptionMutation.mutate({
+            token,
+            optionId: payload.data.optionId,
+            updatedOption: { name: payload.data.name, values: payload.data.values },
+          })
+          break
+        }
+        case 'update:variant': {
+          isLoading.value = true
+
+          const token = await getAccessTokenSilently()
+
+          await updateVariantMutation.mutate({
+            token,
+            variantId: payload.data.variantId,
+            updatedVariant: {
+              sku: payload.data.sku,
+              price: payload.data.price,
+              inventoryQuantity: payload.data.inventoryQuantity,
+              optionValues: payload.data.optionValues,
+            },
+          })
+          break
+        }
+        default:
+          throw new Error('Please specify valid product action')
+      }
+
+      await revalidateProduct()
+
+      isLoading.value = false
+    } catch (e) {
+      console.log(e)
+      ElNotification({
+        title: 'Error saving product',
+        message: `${e}`,
+        type: 'error',
+        position: 'bottom-right',
+      })
     }
-  },
-  { immediate: true },
-)
+  } else {
+    ElMessageBox({
+      title: 'Login Required',
+      message: 'Authentication is required for this action. Please login to continue.',
+      showCancelButton: true,
+      confirmButtonText: 'Log In',
+    })
+      .then((action) => {
+        if (action === 'confirm') {
+          loginWithRedirect()
+        }
+      })
+      .catch()
+  }
+}
 </script>
 
 <template>
@@ -181,7 +304,7 @@ watch(
   <!-- Heading -->
   <template v-else-if="productQuery.data.value">
     <div
-      v-loading="productQuery.isPending.value"
+      v-loading="productQuery.isPending.value || isLoading"
       class="max-w-4xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container"
     >
       <div class="flex items-center w-full gap-3">
@@ -197,72 +320,30 @@ watch(
 
       <div class="flex flex-col gap-3 col-start-3 row-start-2">
         <!-- Product status -->
-        <section class="bg-light rounded-xl shadow-lg">
-          <Listbox
-            as="div"
-            class="divide-y divide-gray-200"
-            v-model="productStatus"
-            name="product-status"
-          >
-            <div class="flex items-center justify-between p-3">
-              <ListboxLabel class="font-semibold">Product status</ListboxLabel>
-              <button type="button" class="rounded-md py-1 px-2 hover:bg-cool-gray">
-                <EllipsisHorizontalIcon class="size-5" />
-              </button>
-            </div>
-            <div class="p-3">
-              <ListboxButton
-                class="relative border border-gray-300 rounded p-1 w-full flex items-center justify-between my-1"
-              >
-                <p>{{ productStatus ? 'Active' : 'Draft' }}</p>
-                <span>
-                  <ChevronUpDownIcon class="size-5" aria-hidden="true" />
-                </span>
-              </ListboxButton>
-              <div class="relative mt-1">
-                <transition
-                  leave-active-class="transition duration-100 ease-in"
-                  leave-from-class="opacity-100"
-                  leave-to-class="opacity-0"
-                >
-                  <ListboxOptions
-                    class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
-                  >
-                    <ListboxOption :value="true" v-slot="{ active, selected }" as="template">
-                      <li
-                        :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-1 cursor-default']"
-                      >
-                        <span v-show="selected" class="absolute left-0 pl-0.5 text-blue-600">
-                          <CheckIcon class="size-5" aria-hidden="true" />
-                        </span>
-                        <p :class="[selected ? 'font-medium' : 'font-normal', 'pl-5 truncate']">
-                          Active
-                        </p>
-                      </li>
-                    </ListboxOption>
-                    <ListboxOption :value="false" v-slot="{ active, selected }" as="template">
-                      <li
-                        :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-1 cursor-default']"
-                      >
-                        <span v-show="selected" class="absolute left-0 pl-0.5 text-blue-600">
-                          <CheckIcon class="size-5" aria-hidden="true" />
-                        </span>
-                        <p :class="[selected ? 'font-medium' : 'font-normal', 'pl-5 truncate']">
-                          Draft
-                        </p>
-                      </li>
-                    </ListboxOption>
-                  </ListboxOptions>
-                </transition>
-              </div>
-            </div>
-          </Listbox>
+        <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow">
+          <div class="flex items-center justify-between p-3 border-b border-gray-200">
+            <h2 class="font-semibold">Product status</h2>
+            <ItemActions
+              :itemId="productQuery.data.value.product.id"
+              @edit-item="isEditStatusOpen = true"
+            />
+          </div>
+          <div class="p-3">
+            <el-tag>{{ productStatus ? 'Active' : 'Draft' }}</el-tag>
+          </div>
+
+          <EditStatusDialog
+            :is-open="isEditStatusOpen"
+            :status="productQuery.data.value.product.status"
+            @save-edit="(payload) => handleSubmit({ action: 'update:productStatus', ...payload })"
+            @cancel-edit="isEditStatusOpen = false"
+          />
         </section>
 
-        <!-- Product organization/collections -->
+        <!-- Product organization -->
         <div v-if="collectionsQuery.isPending.value">Loading...</div>
         <div v-else-if="collectionsQuery.isError.value">
-          An error has occured: {{ collectionsQuery.error.value }}
+          An error has occured fetching collections: {{ collectionsQuery.error.value }}
         </div>
 
         <section
@@ -271,78 +352,47 @@ watch(
         >
           <div class="flex items-center justify-between p-3">
             <h2 class="font-semibold">Product organization</h2>
-            <button type="button" class="rounded-md py-1 px-2 hover:bg-cool-gray">
-              <EllipsisHorizontalIcon class="size-5" />
-            </button>
           </div>
-          <Listbox
-            as="div"
-            v-model="selectedCollections"
-            name="selected-collections"
-            multiple
-            class="p-3"
-          >
-            <ListboxLabel>Collections</ListboxLabel>
-            <ListboxButton
-              class="relative border border-gray-300 rounded p-2 w-full flex items-center justify-between my-1"
-            >
-              <div v-if="selectedCollections.length" class="flex gap-1 flex-wrap">
-                <el-tag v-for="collection in selectedCollections" :key="collection.id">
-                  <p class="truncate">{{ collection.title }}</p>
-                </el-tag>
-              </div>
-              <p v-else>Select collections</p>
-              <span>
-                <ChevronUpDownIcon class="size-5" aria-hidden="true" />
-              </span>
-            </ListboxButton>
-            <div class="relative mt-1">
-              <transition
-                leave-active-class="transition duration-100 ease-in"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0"
-              >
-                <ListboxOptions
-                  class="absolute z-50 w-full bg-light shadow-lg rounded border border-gray-300"
-                >
-                  <template v-if="collections.length">
-                    <ListboxOption
-                      v-for="collection in collections"
-                      :key="collection.id"
-                      :value="selectedCollections.find((c) => collection.id === c.id) ?? collection"
-                      v-slot="{ active, selected }"
-                      as="template"
-                    >
-                      <li
-                        :class="[active ? 'bg-blue-100 text-blue-900' : '', 'p-2 cursor-default']"
-                      >
-                        <span v-show="selected" class="absolute left-0 pl-0.5 text-blue-600">
-                          <CheckIcon class="size-5" aria-hidden="true" />
-                        </span>
-                        <p :class="[selected ? 'font-medium' : 'font-normal', 'pl-5 truncate']">
-                          {{ collection.title }}
-                        </p>
-                      </li>
-                    </ListboxOption>
-                  </template>
-                  <ListboxOption v-else disabled class="p-2 opacity-70 cursor-default">
-                    Create collections
-                  </ListboxOption>
-                </ListboxOptions>
-              </transition>
+
+          <!-- Collections -->
+          <div class="p-3">
+            <div class="mb-1 flex justify-between items-center">
+              <p>Collections</p>
+              <ItemActions
+                :item-id="productQuery.data.value.product.id"
+                @edit-item="isEditCollectionsOpen = true"
+              />
             </div>
-          </Listbox>
+
+            <div v-if="selectedCollections.length" class="flex gap-1 flex-wrap">
+              <el-tag v-for="collection in selectedCollections" :key="collection.id">
+                <p class="truncate">{{ collection.title }}</p>
+              </el-tag>
+            </div>
+            <p v-else>Select collections</p>
+
+            <EditProductCollectionsDialog
+              :is-open="isEditCollectionsOpen"
+              :selected-collections="selectedCollections"
+              :collections="collections"
+              @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
+              @cancel-edit="isEditCollectionsOpen = false"
+            />
+          </div>
         </section>
       </div>
 
       <div class="flex flex-col items-center gap-5 col-span-2 row-start-2">
         <!-- Title and description section -->
-        <section class="w-full bg-light rounded-xl shadow-lg">
+        <section class="w-full bg-light rounded-xl shadow-lg outline outline-gray-200">
           <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
             <h2 class="font-semibold">Product info</h2>
-            <button type="button" class="rounded-md py-1 px-2 hover:bg-cool-gray">
-              <EllipsisHorizontalIcon class="size-5" />
-            </button>
+            <div class="text-end">
+              <ItemActions
+                :itemId="productQuery.data.value.product.id"
+                @edit-item="isEditProductOpen = true"
+              />
+            </div>
           </div>
           <div class="p-3">
             <p>Title</p>
@@ -356,10 +406,19 @@ watch(
               {{ description }}
             </p>
           </div>
+
+          <EditProductDialog
+            :is-open="isEditProductOpen"
+            :product-id="productQuery.data.value.product.id"
+            :title="title"
+            :description="description"
+            @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
+            @cancel-edit="isEditProductOpen = false"
+          />
         </section>
 
         <!-- Options section -->
-        <section class="w-full bg-light rounded-xl shadow-lg overflow-hidden">
+        <section class="w-full bg-light rounded-xl shadow-lg outline outline-gray-200">
           <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
             <h2 class="font-semibold">Options</h2>
             <button
@@ -370,15 +429,26 @@ watch(
             </button>
           </div>
 
-          <TableComponent
-            v-if="optionsTableData.length"
-            :table="optionTable"
-            :is-loading="false"
-            :include-headers="false"
-          />
+          <div>
+            <TableComponent
+              v-if="options.length"
+              :table="optionTable"
+              :is-loading="false"
+              :include-headers="false"
+            />
+
+            <EditOptionDialog
+              :is-open="isEditOptionOpen"
+              :option-id="activeEditOption?.id"
+              :name="activeEditOption?.name"
+              :values="activeEditOption?.values"
+              @save-edit="(payload) => handleSubmit({ action: 'update:option', ...payload })"
+              @cancel-edit="isEditOptionOpen = false"
+            />
+          </div>
         </section>
 
-        <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow overflow-hidden">
+        <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow">
           <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
             <h2 class="font-semibold">Variants</h2>
             <button
@@ -389,12 +459,27 @@ watch(
             </button>
           </div>
 
-          <TableComponent
-            v-if="variantsTableData.length"
-            :table="variantsTable"
-            :is-loading="false"
-            :include-headers="true"
-          />
+          <div>
+            <TableComponent
+              v-if="variants.length"
+              :table="variantsTable"
+              :is-loading="false"
+              :include-headers="true"
+            />
+
+            <EditVariantDialog
+              v-model:is-open="isEditVariantOpen"
+              :currency-symbol="currencyInfo.symbol"
+              :variant-id="activeEditVariant?.id"
+              :options="options"
+              :selected-values="activeEditVariant?.selectedValues"
+              :inventory-quantity="activeEditVariant?.inventoryQuantity"
+              :sku="activeEditVariant?.sku"
+              :price="activeEditVariant?.price"
+              @save-edit="(payload) => handleSubmit({ action: 'update:variant', ...payload })"
+              @cancel-edit="isEditVariantOpen = false"
+            />
+          </div>
         </section>
       </div>
     </div>
