@@ -1,4 +1,10 @@
-import type { CreateProductResponse, ProductCreateDTO, ProductUpdateDTO } from '@/lib/types'
+import type {
+  CreateProductResponse,
+  OptionUpdateDTO,
+  ProductCreateDTO,
+  ProductUpdateDTO,
+  ProductVariantUpdateDTO,
+} from '@/lib/types'
 import axios from 'axios'
 
 export async function postNewProduct(
@@ -42,6 +48,42 @@ export async function updateProduct(
   const response = await axios.put(
     `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}`,
     updatedProduct,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  )
+  return response.data
+}
+
+export async function updateOption(
+  token: string,
+  productId: string,
+  optionId: string,
+  updatedOption: OptionUpdateDTO,
+) {
+  const response = await axios.put(
+    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/options/${optionId}`,
+    updatedOption,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  )
+  return response.data
+}
+
+export async function updateVariant(
+  token: string,
+  productId: string,
+  variantId: string,
+  updatedVariant: ProductVariantUpdateDTO,
+) {
+  const response = await axios.put(
+    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/options/${variantId}`,
+    updatedVariant,
     {
       headers: {
         Authorization: `Bearer ${token}`,
