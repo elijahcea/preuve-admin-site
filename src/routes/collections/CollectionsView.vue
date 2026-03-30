@@ -17,6 +17,7 @@ import { ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/
 import { deleteCollection } from '@/api/mutations'
 import { ElMessageBox, ElNotification } from 'element-plus'
 import { useAuth0 } from '@auth0/auth0-vue'
+import { RouterLink } from 'vue-router'
 
 const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
@@ -70,6 +71,13 @@ const columns = [
   columnHelper.accessor('title', {
     header: 'Collection',
     sortingFn: 'alphanumeric',
+    cell: (props) => (
+      <button type="button" class="w-full text-start">
+        <RouterLink to={{ name: 'collectionDetails', params: { id: props.row.id } }}>
+          {props.getValue()}
+        </RouterLink>
+      </button>
+    ),
   }),
   columnHelper.accessor('description', {
     header: 'Description',
@@ -193,9 +201,9 @@ const handleDeleteCollections = async () => {
       <h1 class="text-xl font-bold">Collections</h1>
       <div class="flex gap-3">
         <Menu as="div" class="relative">
-          <MenuButton class="bg-cool-gray font-bold rounded py-1 px-2">
+          <MenuButton class="bg-light outline outline-gray-200 font-medium rounded-md py-1 px-2">
             <span>More actions</span>
-            <ChevronDownIcon class="size-5 inline-block font-bold ml-1" aria-hidden="true" />
+            <ChevronDownIcon class="size-5 inline-block ml-1" aria-hidden="true" />
           </MenuButton>
           <transition
             enter-active-class="transition duration-100 ease-out"
@@ -206,9 +214,9 @@ const handleDeleteCollections = async () => {
             leave-to-class="transform scale-95 opacity-0"
           >
             <MenuItems
-              class="absolute p-1 mt-0.5 w-full rounded bg-white shadow-lg divide-y divide-gray-100"
+              class="absolute mt-0.5 w-full rounded-md bg-white shadow-lg divide-y divide-gray-100"
             >
-              <MenuItem as="div" v-slot="{ active }" :disabled="!selectedRowId">
+              <MenuItem as="div" class="p-1" v-slot="{ active }" :disabled="!selectedRowId">
                 <component
                   :is="selectedRowId ? 'RouterLink' : 'span'"
                   :to="{
@@ -219,7 +227,7 @@ const handleDeleteCollections = async () => {
                   <button
                     :class="[
                       { 'bg-cool-gray': active },
-                      'flex items-center gap-1 w-full font-semibold rounded-md p-2',
+                      'flex items-center gap-1 w-full font-medium rounded-md p-2',
                       `${selectedRowId ?? 'opacity-50'}`,
                     ]"
                     type="button"
@@ -229,12 +237,12 @@ const handleDeleteCollections = async () => {
                   </button>
                 </component>
               </MenuItem>
-              <MenuItem as="div" v-slot="{ active }" :disabled="!isSomeRowsSelected">
+              <MenuItem as="div" class="p-1" v-slot="{ active }" :disabled="!isSomeRowsSelected">
                 <button
                   :disabled="!isSomeRowsSelected"
                   :class="[
                     { 'bg-cool-gray': active },
-                    'flex items-center gap-1 w-full font-semibold rounded-md p-2',
+                    'flex items-center gap-1 w-full font-medium rounded-md p-2',
                     `${!isSomeRowsSelected ? 'opacity-50' : ''}`,
                   ]"
                   type="button"
@@ -247,7 +255,7 @@ const handleDeleteCollections = async () => {
             </MenuItems>
           </transition>
         </Menu>
-        <button class="font-bold rounded-md py-1 px-2 bg-fill text-background hover:opacity-80">
+        <button class="font-medium rounded-md py-1 px-2 bg-fill text-background hover:opacity-80">
           <RouterLink
             :to="{
               name: 'newCollection',
