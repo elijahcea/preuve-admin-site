@@ -11,9 +11,16 @@ import {
   type ProductUpdateDTO,
   type OptionUpdateDTO,
   type ProductVariantUpdateDTO,
+  type OptionCreateDTO,
+  type ProductVariantCreateDTO,
 } from '@/lib/types'
-import router from '@/router'
-import { updateOption, updateProduct, updateVariant } from '@/api/mutations'
+import {
+  createOption,
+  createVariant,
+  updateOption,
+  updateProduct,
+  updateVariant,
+} from '@/api/mutations'
 import { ElTag } from 'element-plus'
 import { createColumnHelper, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import TableComponent from '@/components/TableComponent.vue'
@@ -27,6 +34,8 @@ import { ElMessageBox, ElNotification } from 'element-plus'
 import { useAuth0 } from '@auth0/auth0-vue'
 import EditStatusDialog from '@/components/dialogs/EditStatusDialog.vue'
 import EditProductCollectionsDialog from '@/components/dialogs/EditProductCollectionsDialog.vue'
+import CreateOptionDialog from '@/components/dialogs/CreateOptionDialog.vue'
+import CreateVariantDialog from '@/components/dialogs/CreateVariantDialog.vue'
 
 type ProductUpdatePayload = {
   action: 'update:product'
@@ -40,6 +49,16 @@ type OptionUpdatePayload = {
 type VariantUpdatePayload = {
   action: 'update:variant'
   data: ProductVariantUpdateDTO & { variantId: string }
+}
+
+type OptionCreatePayload = {
+  action: 'create:option'
+  data: OptionCreateDTO
+}
+
+type VariantCreatePayload = {
+  action: 'create:variant'
+  data: ProductVariantCreateDTO
 }
 
 const props = defineProps<{
@@ -56,6 +75,8 @@ const isEditStatusOpen = ref(false)
 const isEditCollectionsOpen = ref(false)
 const isEditOptionOpen = ref(false)
 const isEditVariantOpen = ref(false)
+const isCreateOptionOpen = ref(false)
+const isCreateVariantOpen = ref(false)
 
 const productStatus = computed(() => productQuery.data.value?.product.status ?? false)
 const title = computed(() => productQuery.data.value?.product.title ?? '')
@@ -87,36 +108,42 @@ const collectionsQuery = useQuery({
 })
 
 const updateProductMutation = useMutation({
-  mutationFn: ({ token, updatedProduct }: { token: string; updatedProduct: ProductUpdateDTO }) =>
-    updateProduct(token, props.id, updatedProduct),
-  onSuccess: (data) => {
-    const { product } = data
-    router.push({ name: 'productDetails', params: { id: product.id } })
-  },
+  mutationFn: ({ token, product }: { token: string; product: ProductUpdateDTO }) =>
+    updateProduct(token, props.id, product),
 })
 
 const updateOptionMutation = useMutation({
   mutationFn: ({
     token,
     optionId,
-    updatedOption,
+    option,
   }: {
     token: string
     optionId: string
-    updatedOption: OptionUpdateDTO
-  }) => updateOption(token, props.id, optionId, updatedOption),
+    option: OptionUpdateDTO
+  }) => updateOption(token, props.id, optionId, option),
 })
 
 const updateVariantMutation = useMutation({
   mutationFn: ({
     token,
     variantId,
-    updatedVariant,
+    variant,
   }: {
     token: string
     variantId: string
-    updatedVariant: ProductVariantUpdateDTO
-  }) => updateVariant(token, props.id, variantId, updatedVariant),
+    variant: ProductVariantUpdateDTO
+  }) => updateVariant(token, props.id, variantId, variant),
+})
+
+const createOptionMutation = useMutation({
+  mutationFn: ({ token, option }: { token: string; option: OptionCreateDTO }) =>
+    createOption(token, props.id, option),
+})
+
+const createVariantMutation = useMutation({
+  mutationFn: ({ token, variant }: { token: string; variant: ProductVariantCreateDTO }) =>
+    createVariant(token, props.id, variant),
 })
 
 const optionColumns = [
@@ -219,46 +246,57 @@ const revalidateProduct = async () => {
 }
 
 const handleSubmit = async (
-  payload: ProductUpdatePayload | OptionUpdatePayload | VariantUpdatePayload,
+  payload:
+    | ProductUpdatePayload
+    | OptionUpdatePayload
+    | VariantUpdatePayload
+    | OptionCreatePayload
+    | VariantCreatePayload,
 ) => {
   console.log(payload)
   if (isAuthenticated.value) {
     try {
+      isLoading.value = true
+
+      const token = await getAccessTokenSilently()
+
       switch (payload.action) {
         case 'update:product': {
-          isLoading.value = true
-
-          const token = await getAccessTokenSilently()
-
-          await updateProductMutation.mutate({ token, updatedProduct: payload.data })
+          await updateProductMutation.mutate({ token, product: payload.data })
           break
         }
         case 'update:option': {
-          isLoading.value = true
-
-          const token = await getAccessTokenSilently()
-
           await updateOptionMutation.mutate({
             token,
             optionId: payload.data.optionId,
-            updatedOption: { name: payload.data.name, values: payload.data.values },
+            option: { name: payload.data.name, values: payload.data.values },
           })
           break
         }
         case 'update:variant': {
-          isLoading.value = true
-
-          const token = await getAccessTokenSilently()
-
           await updateVariantMutation.mutate({
             token,
             variantId: payload.data.variantId,
-            updatedVariant: {
+            variant: {
               sku: payload.data.sku,
               price: payload.data.price,
               inventoryQuantity: payload.data.inventoryQuantity,
-              optionValues: payload.data.optionValues,
+              selectedValues: payload.data.selectedValues,
             },
+          })
+          break
+        }
+        case 'create:option': {
+          await createOptionMutation.mutate({
+            token,
+            option: payload.data,
+          })
+          break
+        }
+        case 'create:variant': {
+          await createVariantMutation.mutate({
+            token,
+            variant: payload.data,
           })
           break
         }
@@ -290,7 +328,7 @@ const handleSubmit = async (
           loginWithRedirect()
         }
       })
-      .catch()
+      .catch((reason) => console.log(reason))
   }
 }
 </script>
@@ -424,6 +462,7 @@ const handleSubmit = async (
             <button
               type="button"
               class="bg-light outline outline-gray-200 rounded-md py-1 px-2 hover:bg-cool-gray"
+              @click.prevent="isCreateOptionOpen = true"
             >
               Create
             </button>
@@ -435,6 +474,12 @@ const handleSubmit = async (
               :table="optionTable"
               :is-loading="false"
               :include-headers="false"
+            />
+
+            <CreateOptionDialog
+              :is-open="isCreateOptionOpen"
+              @save="(payload) => handleSubmit({ action: 'create:option', ...payload })"
+              @cancel="isCreateOptionOpen = false"
             />
 
             <EditOptionDialog
@@ -454,6 +499,7 @@ const handleSubmit = async (
             <button
               type="button"
               class="bg-light outline outline-gray-200 rounded-md py-1 px-2 hover:bg-cool-gray"
+              @click.prevent="isCreateVariantOpen = true"
             >
               Create
             </button>
@@ -465,6 +511,14 @@ const handleSubmit = async (
               :table="variantsTable"
               :is-loading="false"
               :include-headers="true"
+            />
+
+            <CreateVariantDialog
+              :is-open="isCreateVariantOpen"
+              :currency-symbol="currencyInfo.symbol"
+              :options="options"
+              @save="(payload) => handleSubmit({ action: 'create:variant', ...payload })"
+              @cancel="isCreateVariantOpen = false"
             />
 
             <EditVariantDialog
