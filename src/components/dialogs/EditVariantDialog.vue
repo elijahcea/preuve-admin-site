@@ -11,7 +11,7 @@ const {
 
   variantId,
   options,
-  selectedValues,
+  selectedValues = [],
   inventoryQuantity = 0,
   sku = null,
   price = 0,
@@ -30,10 +30,17 @@ const {
 const emit = defineEmits(['saveEdit', 'cancelEdit'])
 
 const variantInfo = ref()
-const activeValues = ref<ProductOptionValue[]>()
+const activeValues = ref<ProductOptionValue[]>([])
 
 const handleSelectChange = (val: ProductOptionValue) => {
-  activeValues.value = activeValues.value?.map((v) => (v.optionId === val.optionId ? val : v))
+  const currValIdx = activeValues.value.findIndex((v) => v.optionId === val.optionId)
+  if (currValIdx === -1) {
+    activeValues.value = [val, ...activeValues.value]
+  } else {
+    const updatedValues = [...activeValues.value]
+    updatedValues.splice(currValIdx, 1, val)
+    activeValues.value = updatedValues
+  }
 }
 
 watch(
@@ -45,7 +52,7 @@ watch(
         sku,
         price,
       }
-      activeValues.value = selectedValues?.map((v) => v)
+      activeValues.value = selectedValues.map((v) => v)
     }
   },
 )
@@ -66,7 +73,9 @@ watch(
         <div class="fixed inset-0 bg-black/25"></div>
       </TransitionChild>
       <form
-        @submit.prevent="emit('saveEdit')"
+        @submit.prevent="
+          emit('saveEdit', { variantId, selectedValues: activeValues, ...variantInfo })
+        "
         class="fixed inset-0 flex min-h-full items-center justify-center"
       >
         <TransitionChild
@@ -107,7 +116,7 @@ watch(
               </div>
             </div>
 
-            <div>
+            <div class="text-sm">
               <label class="my-1" for="price">Price</label>
               <PriceInput
                 input-id="price"
