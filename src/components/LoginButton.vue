@@ -11,7 +11,7 @@ const login = () => loginWithRedirect()
     @click.prevent="login"
     :disabled="isLoading"
     v-loading="isLoading"
-    class="bg-fill rounded-md p-2 hover:bg-fill/50 text-sm"
+    class="bg-fill rounded-md py-1 px-2 outline outline-black hover:bg-fill/50 text-sm"
   >
     Log In
   </button>

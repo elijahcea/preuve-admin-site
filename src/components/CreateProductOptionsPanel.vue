@@ -219,7 +219,7 @@ watch(
       v-if="options.length < 3"
       type="button"
       @click="addOption"
-      class="font-bold rounded-md py-1 px-2 my-3 bg-fill text-background"
+      class="font-medium rounded-md py-1 px-2 my-3 bg-fill text-background"
     >
       Add option
     </button>

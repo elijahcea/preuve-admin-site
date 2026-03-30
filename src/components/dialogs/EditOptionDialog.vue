@@ -143,14 +143,14 @@ watch(
             <div class="flex justify-end gap-1 mt-3">
               <button
                 type="button"
-                class="rounded-md bg-cool-gray py-1 px-2 hover:opacity-80"
+                class="bg-light outline outline-gray-200 font-medium rounded-md py-1 px-2 hover:bg-gray-200"
                 @click="emit('cancelEdit')"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="rounded-md py-1 px-2 ml-2 bg-fill text-background hover:opacity-80"
+                class="font-medium rounded-md ml-2 py-1 px-2 bg-fill text-background hover:opacity-80"
               >
                 Done
               </button>
