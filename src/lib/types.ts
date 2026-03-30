@@ -121,7 +121,7 @@ export interface ProductVariantCreateDTO {
   price: number
   inventoryQuantity: number
 
-  optionValues: VariantOptionValueCreateDTO[]
+  selectedValues: VariantOptionValueCreateDTO[]
 }
 
 export type ProductVariantCreateInput = ProductVariantCreateDTO & {
@@ -169,18 +169,12 @@ export interface ProductVariantUpdateDTO {
   price?: number
   inventoryQuantity?: number
 
-  optionValues?: VariantOptionValueUpdateDTO[]
+  selectedValues?: ProductOptionValue[]
 }
 
 export type ProductVariantUpdateInput = ProductVariantUpdateDTO & {
   productId: string
   id: string
-}
-
-export interface VariantOptionValueUpdateDTO {
-  id: string
-  name: string
-  optionName: string
 }
 
 // API Response Types
@@ -222,7 +216,7 @@ export type ProductVariantCreateForm = {
   price: number
   sku: string | null
   inventoryQuantity: number
-  optionValues: OptionValueCreateForm[]
+  selectedValues: OptionValueCreateForm[]
 }
 
 export type OptionCreateForm = {
