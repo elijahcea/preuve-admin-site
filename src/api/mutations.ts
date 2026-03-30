@@ -42,6 +42,30 @@ export async function deleteCollection(token: string, collectionId: string) {
   return response.data
 }
 
+export async function deleteOption(token: string, productId: string, optionId: string) {
+  const response = await axios.delete(
+    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/options/${optionId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  )
+  return response.data
+}
+
+export async function deleteVariant(token: string, productId: string, variantId: string) {
+  const response = await axios.delete(
+    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/variants/${variantId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  )
+  return response.data
+}
+
 export async function updateProduct(
   token: string,
   productId: string,

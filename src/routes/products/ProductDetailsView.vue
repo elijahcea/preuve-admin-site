@@ -17,6 +17,9 @@ import {
 import {
   createOption,
   createVariant,
+  deleteOption,
+  deleteProduct,
+  deleteVariant,
   updateOption,
   updateProduct,
   updateVariant,
@@ -36,6 +39,7 @@ import EditStatusDialog from '@/components/dialogs/EditStatusDialog.vue'
 import EditProductCollectionsDialog from '@/components/dialogs/EditProductCollectionsDialog.vue'
 import CreateOptionDialog from '@/components/dialogs/CreateOptionDialog.vue'
 import CreateVariantDialog from '@/components/dialogs/CreateVariantDialog.vue'
+import router from '@/router'
 
 type ProductUpdatePayload = {
   action: 'update:product'
@@ -60,6 +64,8 @@ type VariantCreatePayload = {
   action: 'create:variant'
   data: ProductVariantCreateDTO
 }
+
+type DeleteAction = 'delete:product' | 'delete:option' | 'delete:variant'
 
 const props = defineProps<{
   id: string
@@ -146,6 +152,22 @@ const createVariantMutation = useMutation({
     createVariant(token, props.id, variant),
 })
 
+const deleteProductMutation = useMutation({
+  mutationFn: ({ token, productId }: { token: string; productId: string }) =>
+    deleteProduct(token, productId),
+  onSuccess: () => router.push({ name: 'products' }),
+})
+
+const deleteOptionMutation = useMutation({
+  mutationFn: ({ token, optionId }: { token: string; optionId: string }) =>
+    deleteOption(token, props.id, optionId),
+})
+
+const deleteVariantMutation = useMutation({
+  mutationFn: ({ token, variantId }: { token: string; variantId: string }) =>
+    deleteVariant(token, props.id, variantId),
+})
+
 const optionColumns = [
   optionColumnHelper.accessor('name', {
     header: 'Name',
@@ -169,10 +191,13 @@ const optionColumns = [
       <div class="text-end">
         <ItemActions
           itemId={props.row.id}
+          allowEdit={true}
+          allowDelete={true}
           onEditItem={() => {
             activeEditOptionId.value = props.row.id
             isEditOptionOpen.value = true
           }}
+          onDeleteItem={() => openConfirmPopover('delete:option', props.row.id)}
         />
       </div>
     ),
@@ -207,10 +232,13 @@ const variantColumns = [
       <div class="text-end">
         <ItemActions
           itemId={props.row.id}
+          allowEdit={true}
+          allowDelete={true}
           onEditItem={() => {
             activeEditVariantId.value = props.row.id
             isEditVariantOpen.value = true
           }}
+          onDeleteItem={() => openConfirmPopover('delete:variant', props.row.id)}
         />
       </div>
     ),
@@ -243,6 +271,16 @@ const revalidateProduct = async () => {
       position: 'bottom-right',
     })
   }
+}
+
+const openConfirmPopover = (action: DeleteAction, id: string) => {
+  ElMessageBox.confirm('This action will permanently delete and cannot be undone. Continue?', {
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+  })
+    .then(() => handleDelete(action, id))
+    .catch((reason) => console.log(reason))
 }
 
 const handleSubmit = async (
@@ -305,12 +343,62 @@ const handleSubmit = async (
       }
 
       await revalidateProduct()
-
       isLoading.value = false
     } catch (e) {
       console.log(e)
       ElNotification({
         title: 'Error saving product',
+        message: `${e}`,
+        type: 'error',
+        position: 'bottom-right',
+      })
+    }
+  } else {
+    ElMessageBox({
+      title: 'Login Required',
+      message: 'Authentication is required for this action. Please login to continue.',
+      showCancelButton: true,
+      confirmButtonText: 'Log In',
+    })
+      .then((action) => {
+        if (action === 'confirm') {
+          loginWithRedirect()
+        }
+      })
+      .catch((reason) => console.log(reason))
+  }
+}
+
+const handleDelete = async (action: DeleteAction, id: string) => {
+  if (isAuthenticated.value) {
+    try {
+      isLoading.value = true
+
+      const token = await getAccessTokenSilently()
+
+      switch (action) {
+        case 'delete:product': {
+          await deleteProductMutation.mutate({ token, productId: id })
+          return
+        }
+        case 'delete:option': {
+          await deleteOptionMutation.mutate({ token, optionId: id })
+          break
+        }
+        case 'delete:variant': {
+          await deleteVariantMutation.mutate({ token, variantId: id })
+          break
+        }
+        default:
+          throw new Error('Please specify valid product action')
+      }
+
+      await revalidateProduct()
+      isLoading.value = false
+    } catch (e) {
+      console.log(e)
+      ElNotification({
+        title: 'Error during deletion',
         message: `${e}`,
         type: 'error',
         position: 'bottom-right',
@@ -343,9 +431,9 @@ const handleSubmit = async (
   <template v-else-if="productQuery.data.value">
     <div
       v-loading="productQuery.isPending.value || isLoading"
-      class="max-w-4xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container"
+      class="max-w-7xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container"
     >
-      <div class="flex items-center w-full gap-3">
+      <div class="flex items-center w-full gap-3 col-span-2">
         <RouterLink
           :to="{ name: 'products' }"
           class="p-1 hover:bg-current/20 rounded border border-gray-400"
@@ -363,6 +451,8 @@ const handleSubmit = async (
             <h2 class="font-semibold">Product status</h2>
             <ItemActions
               :itemId="productQuery.data.value.product.id"
+              :allow-edit="true"
+              :allow-delete="false"
               @edit-item="isEditStatusOpen = true"
             />
           </div>
@@ -398,6 +488,8 @@ const handleSubmit = async (
               <p>Collections</p>
               <ItemActions
                 :item-id="productQuery.data.value.product.id"
+                :allow-edit="true"
+                :allow-delete="false"
                 @edit-item="isEditCollectionsOpen = true"
               />
             </div>
@@ -428,7 +520,10 @@ const handleSubmit = async (
             <div class="text-end">
               <ItemActions
                 :itemId="productQuery.data.value.product.id"
+                :allow-edit="true"
+                :allow-delete="true"
                 @edit-item="isEditProductOpen = true"
+                @delete-item="() => openConfirmPopover('delete:product', props.id)"
               />
             </div>
           </div>
