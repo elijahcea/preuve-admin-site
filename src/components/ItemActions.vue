@@ -2,7 +2,11 @@
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { EllipsisHorizontalIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
-const { itemId } = defineProps<{ itemId: string }>()
+const { allowEdit, allowDelete, itemId } = defineProps<{
+  allowEdit: boolean
+  allowDelete: boolean
+  itemId: string
+}>()
 const emit = defineEmits(['editItem', 'deleteItem'])
 </script>
 
@@ -22,7 +26,7 @@ const emit = defineEmits(['editItem', 'deleteItem'])
       <MenuItems
         class="absolute mt-1 w-min-content rounded-md bg-white outline outline-gray-100 shadow-lg divide-y divide-gray-100 z-10"
       >
-        <MenuItem as="div" class="p-1" v-slot="{ active }">
+        <MenuItem v-if="allowEdit" as="div" class="p-1" v-slot="{ active }">
           <button
             :class="[
               { 'bg-cool-gray': active },
@@ -40,7 +44,7 @@ const emit = defineEmits(['editItem', 'deleteItem'])
             Edit
           </button>
         </MenuItem>
-        <MenuItem as="div" class="p-1" v-slot="{ active }">
+        <MenuItem v-if="allowDelete" as="div" class="p-1" v-slot="{ active }">
           <button
             :class="[
               { 'bg-cool-gray': active },
