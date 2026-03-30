@@ -13,6 +13,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CheckboxComponent: typeof import('./src/components/CheckboxComponent.vue')['default']
+    CheckboxInput: typeof import('./src/components/CheckboxInput.vue')['default']
     CreateOptionDialog: typeof import('./src/components/dialogs/CreateOptionDialog.vue')['default']
     CreateOptionsAndVariantsPanel: typeof import('./src/components/CreateOptionsAndVariantsPanel.vue')['default']
     CreateOptionsPanel: typeof import('./src/components/CreateOptionsPanel.vue')['default']
@@ -46,6 +47,7 @@ declare module 'vue' {
     StatusLabel: typeof import('./src/components/StatusLabel.vue')['default']
     TableComponent: typeof import('./src/components/TableComponent.vue')['default']
     TagCell: typeof import('./src/components/cells/TagCell.vue')['default']
+    TanstackTable: typeof import('./src/components/TanstackTable.vue')['default']
     TitleAndDescription: typeof import('./src/components/TitleAndDescription.vue')['default']
     VariantOptionSelect: typeof import('./src/components/VariantOptionSelect.vue')['default']
   }
@@ -57,6 +59,7 @@ declare module 'vue' {
 // For TSX support
 declare global {
   const CheckboxComponent: typeof import('./src/components/CheckboxComponent.vue')['default']
+  const CheckboxInput: typeof import('./src/components/CheckboxInput.vue')['default']
   const CreateOptionDialog: typeof import('./src/components/dialogs/CreateOptionDialog.vue')['default']
   const CreateOptionsAndVariantsPanel: typeof import('./src/components/CreateOptionsAndVariantsPanel.vue')['default']
   const CreateOptionsPanel: typeof import('./src/components/CreateOptionsPanel.vue')['default']
@@ -90,6 +93,7 @@ declare global {
   const StatusLabel: typeof import('./src/components/StatusLabel.vue')['default']
   const TableComponent: typeof import('./src/components/TableComponent.vue')['default']
   const TagCell: typeof import('./src/components/cells/TagCell.vue')['default']
+  const TanstackTable: typeof import('./src/components/TanstackTable.vue')['default']
   const TitleAndDescription: typeof import('./src/components/TitleAndDescription.vue')['default']
   const VariantOptionSelect: typeof import('./src/components/VariantOptionSelect.vue')['default']
 }

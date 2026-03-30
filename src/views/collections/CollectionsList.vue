@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import TableComponent from '@/components/TableComponent.vue'
-import CheckboxComponent from '@/components/CheckboxComponent.vue'
+import TanstackTable from '@/components/TanstackTable.vue'
+import CheckboxInput from '@/components/CheckboxInput.vue'
 import {
   useVueTable,
   createColumnHelper,
@@ -54,18 +54,18 @@ const columns = [
   columnHelper.display({
     id: 'select-col',
     header: ({ table }) => (
-      <CheckboxComponent
+      <CheckboxInput
         checked={table.getIsAllRowsSelected()}
         intederminate={table.getIsSomeRowsSelected()}
         onChange={table.getToggleAllRowsSelectedHandler()}
-      ></CheckboxComponent>
+      ></CheckboxInput>
     ),
     cell: ({ row }) => (
-      <CheckboxComponent
+      <CheckboxInput
         checked={row.getIsSelected()}
         disabled={!row.getCanSelect()}
         onChange={row.getToggleSelectedHandler()}
-      ></CheckboxComponent>
+      ></CheckboxInput>
     ),
   }),
   columnHelper.accessor('title', {
@@ -270,7 +270,7 @@ const handleDeleteCollections = async () => {
     <div v-else-if="isError">Something went wrong: {{ error }}</div>
     <div v-else-if="queryData" class="bg-light outline outline-gray-200 rounded-xl shadow">
       <div>
-        <TableComponent :table="table" :is-loading="isLoading" :include-headers="true" />
+        <TanstackTable :table="table" :is-loading="isLoading" :include-headers="true" />
       </div>
     </div>
   </div>

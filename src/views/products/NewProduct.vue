@@ -25,7 +25,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import TitleAndDescription from '@/components/TitleAndDescription.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import CreateProductOptionsPanel from '@/components/CreateProductOptionsPanel.vue'
-import TableComponent from '@/components/TableComponent.vue'
+import TanstackTable from '@/components/TanstackTable.vue'
 import InventoryPanel from '@/components/InventoryPanel.vue'
 import { postNewProduct } from '@/api/mutations'
 import router from '@/router'
@@ -480,7 +480,7 @@ const handleSubmit = async () => {
               @cancel="cancelVariantEdit"
             />
             <div>
-              <TableComponent :table="variantsTable" :is-loading="false" :include-headers="true" />
+              <TanstackTable :table="variantsTable" :is-loading="false" :include-headers="true" />
             </div>
           </section>
         </Transition>

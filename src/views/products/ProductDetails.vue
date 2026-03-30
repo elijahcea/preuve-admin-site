@@ -26,7 +26,7 @@ import {
 } from '@/api/mutations'
 import { ElTag } from 'element-plus'
 import { createColumnHelper, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
-import TableComponent from '@/components/TableComponent.vue'
+import TanstackTable from '@/components/TanstackTable.vue'
 import TagCell from '@/components/cells/TagCell.vue'
 import PriceCell from '@/components/cells/PriceCell.vue'
 import ItemActions from '@/components/ItemActions.vue'
@@ -599,7 +599,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
         </div>
 
         <div>
-          <TableComponent
+          <TanstackTable
             v-if="options.length"
             :table="optionTable"
             :is-loading="false"
@@ -636,7 +636,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
         </div>
 
         <div>
-          <TableComponent
+          <TanstackTable
             v-if="variants.length"
             :table="variantsTable"
             :is-loading="false"
