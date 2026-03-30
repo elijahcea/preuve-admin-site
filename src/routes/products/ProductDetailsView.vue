@@ -312,11 +312,11 @@ const handleSubmit = async (
 
       switch (payload.action) {
         case 'update:product': {
-          await updateProductMutation.mutate({ token, product: payload.data })
+          await updateProductMutation.mutateAsync({ token, product: payload.data })
           break
         }
         case 'update:option': {
-          await updateOptionMutation.mutate({
+          await updateOptionMutation.mutateAsync({
             token,
             optionId: payload.data.optionId,
             option: { name: payload.data.name, values: payload.data.values },
@@ -324,7 +324,7 @@ const handleSubmit = async (
           break
         }
         case 'update:variant': {
-          await updateVariantMutation.mutate({
+          await updateVariantMutation.mutateAsync({
             token,
             variantId: payload.data.variantId,
             variant: {
@@ -337,14 +337,14 @@ const handleSubmit = async (
           break
         }
         case 'create:option': {
-          await createOptionMutation.mutate({
+          await createOptionMutation.mutateAsync({
             token,
             option: payload.data,
           })
           break
         }
         case 'create:variant': {
-          await createVariantMutation.mutate({
+          await createVariantMutation.mutateAsync({
             token,
             variant: payload.data,
           })
@@ -371,6 +371,7 @@ const handleSubmit = async (
         type: 'error',
         position: 'bottom-right',
       })
+      isLoading.value = false
     }
   } else {
     ElMessageBox({
@@ -397,15 +398,15 @@ const handleDelete = async (action: DeleteAction, id: string) => {
 
       switch (action) {
         case 'delete:product': {
-          await deleteProductMutation.mutate({ token, productId: id })
+          await deleteProductMutation.mutateAsync({ token, productId: id })
           return
         }
         case 'delete:option': {
-          await deleteOptionMutation.mutate({ token, optionId: id })
+          await deleteOptionMutation.mutateAsync({ token, optionId: id })
           break
         }
         case 'delete:variant': {
-          await deleteVariantMutation.mutate({ token, variantId: id })
+          await deleteVariantMutation.mutateAsync({ token, variantId: id })
           break
         }
         default:
@@ -429,6 +430,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
         type: 'error',
         position: 'bottom-right',
       })
+      isLoading.value = false
     }
   } else {
     ElMessageBox({
@@ -453,220 +455,219 @@ const handleDelete = async (action: DeleteAction, id: string) => {
     An error has occured: {{ productQuery.error.value }}
   </div>
 
-  <!-- Heading -->
-  <template v-else-if="productQuery.data.value">
-    <div
-      v-loading="productQuery.isPending.value || isLoading"
-      class="max-w-7xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container"
-    >
-      <div class="flex items-center w-full gap-3 col-span-2">
-        <RouterLink
-          :to="{ name: 'products' }"
-          class="p-1 hover:bg-current/20 rounded border border-gray-400"
-        >
-          <ArrowLeftIcon class="size-5" />
-        </RouterLink>
-        <h1 class="font-bold text-xl truncate">{{ title }}</h1>
-        <StatusLabel :status="productStatus" />
+  <div
+    v-else-if="productQuery.data.value"
+    v-loading="productQuery.isPending.value || isLoading"
+    class="max-w-7xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container"
+  >
+    <!-- Heading -->
+    <div class="flex items-center w-full gap-3 col-span-2">
+      <RouterLink
+        :to="{ name: 'products' }"
+        class="p-1 hover:bg-current/20 rounded border border-gray-400"
+      >
+        <ArrowLeftIcon class="size-5" />
+      </RouterLink>
+      <h1 class="font-bold text-xl truncate">{{ title }}</h1>
+      <StatusLabel :status="productStatus" />
+    </div>
+
+    <div class="flex flex-col gap-3 col-start-3 row-start-2">
+      <!-- Product status -->
+      <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow">
+        <div class="flex items-center justify-between p-3 border-b border-gray-200">
+          <h2 class="font-semibold">Product status</h2>
+          <ItemActions
+            :itemId="productQuery.data.value.product.id"
+            :allow-edit="true"
+            :allow-delete="false"
+            @edit-item="isEditStatusOpen = true"
+          />
+        </div>
+        <div class="p-3">
+          <el-tag>{{ productStatus ? 'Active' : 'Draft' }}</el-tag>
+        </div>
+
+        <EditStatusDialog
+          :is-open="isEditStatusOpen"
+          :status="productQuery.data.value.product.status"
+          @save-edit="(payload) => handleSubmit({ action: 'update:productStatus', ...payload })"
+          @cancel-edit="isEditStatusOpen = false"
+        />
+      </section>
+
+      <!-- Product organization -->
+      <div v-if="collectionsQuery.isPending.value">Loading...</div>
+      <div v-else-if="collectionsQuery.isError.value">
+        An error has occured fetching collections: {{ collectionsQuery.error.value }}
       </div>
 
-      <div class="flex flex-col gap-3 col-start-3 row-start-2">
-        <!-- Product status -->
-        <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow">
-          <div class="flex items-center justify-between p-3 border-b border-gray-200">
-            <h2 class="font-semibold">Product status</h2>
+      <section
+        v-else-if="collectionsQuery.data.value"
+        class="bg-light rounded-xl shadow-lg divide-y divide-gray-200 min-w-0 col-start-3"
+      >
+        <div class="flex items-center justify-between p-3">
+          <h2 class="font-semibold">Product organization</h2>
+        </div>
+
+        <!-- Collections -->
+        <div class="p-3">
+          <div class="mb-1 flex justify-between items-center">
+            <p>Collections</p>
+            <ItemActions
+              :item-id="productQuery.data.value.product.id"
+              :allow-edit="true"
+              :allow-delete="false"
+              @edit-item="isEditCollectionsOpen = true"
+            />
+          </div>
+
+          <div v-if="selectedCollections.length" class="flex gap-1 flex-wrap">
+            <el-tag v-for="collection in selectedCollections" :key="collection.id">
+              <p class="truncate">{{ collection.title }}</p>
+            </el-tag>
+          </div>
+          <p v-else>Select collections</p>
+
+          <EditProductCollectionsDialog
+            :is-open="isEditCollectionsOpen"
+            :selected-collections="selectedCollections"
+            :collections="collections"
+            @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
+            @cancel-edit="isEditCollectionsOpen = false"
+          />
+        </div>
+      </section>
+    </div>
+
+    <div class="flex flex-col items-center gap-5 col-span-2 row-start-2">
+      <!-- Title and description section -->
+      <section class="w-full bg-light rounded-xl shadow-lg outline outline-gray-200">
+        <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
+          <h2 class="font-semibold">Product info</h2>
+          <div class="text-end">
             <ItemActions
               :itemId="productQuery.data.value.product.id"
               :allow-edit="true"
-              :allow-delete="false"
-              @edit-item="isEditStatusOpen = true"
+              :allow-delete="true"
+              @edit-item="isEditProductOpen = true"
+              @delete-item="
+                () =>
+                  openConfirmPopover(
+                    'delete:product',
+                    props.id,
+                    'This action will permanently delete your product. Continue?',
+                  )
+              "
             />
           </div>
-          <div class="p-3">
-            <el-tag>{{ productStatus ? 'Active' : 'Draft' }}</el-tag>
-          </div>
-
-          <EditStatusDialog
-            :is-open="isEditStatusOpen"
-            :status="productQuery.data.value.product.status"
-            @save-edit="(payload) => handleSubmit({ action: 'update:productStatus', ...payload })"
-            @cancel-edit="isEditStatusOpen = false"
-          />
-        </section>
-
-        <!-- Product organization -->
-        <div v-if="collectionsQuery.isPending.value">Loading...</div>
-        <div v-else-if="collectionsQuery.isError.value">
-          An error has occured fetching collections: {{ collectionsQuery.error.value }}
+        </div>
+        <div class="p-3">
+          <p>Title</p>
+          <p id="title" class="border border-gray-300 rounded p-1 w-full mt-1">
+            {{ title }}
+          </p>
+        </div>
+        <div class="p-3">
+          <p>Description</p>
+          <p id="description" class="resize-none border border-gray-300 rounded p-1 w-full mt-1">
+            {{ description }}
+          </p>
         </div>
 
-        <section
-          v-else-if="collectionsQuery.data.value"
-          class="bg-light rounded-xl shadow-lg divide-y divide-gray-200 min-w-0 col-start-3"
-        >
-          <div class="flex items-center justify-between p-3">
-            <h2 class="font-semibold">Product organization</h2>
-          </div>
+        <EditProductDialog
+          :is-open="isEditProductOpen"
+          :product-id="productQuery.data.value.product.id"
+          :title="title"
+          :description="description"
+          @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
+          @cancel-edit="isEditProductOpen = false"
+        />
+      </section>
 
-          <!-- Collections -->
-          <div class="p-3">
-            <div class="mb-1 flex justify-between items-center">
-              <p>Collections</p>
-              <ItemActions
-                :item-id="productQuery.data.value.product.id"
-                :allow-edit="true"
-                :allow-delete="false"
-                @edit-item="isEditCollectionsOpen = true"
-              />
-            </div>
+      <!-- Options section -->
+      <section class="w-full bg-light rounded-xl shadow-lg outline outline-gray-200">
+        <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
+          <h2 class="font-semibold">Options</h2>
+          <button
+            type="button"
+            class="bg-light outline outline-gray-200 rounded-md py-1 px-2 hover:bg-cool-gray"
+            @click.prevent="isCreateOptionOpen = true"
+          >
+            Create
+          </button>
+        </div>
 
-            <div v-if="selectedCollections.length" class="flex gap-1 flex-wrap">
-              <el-tag v-for="collection in selectedCollections" :key="collection.id">
-                <p class="truncate">{{ collection.title }}</p>
-              </el-tag>
-            </div>
-            <p v-else>Select collections</p>
-
-            <EditProductCollectionsDialog
-              :is-open="isEditCollectionsOpen"
-              :selected-collections="selectedCollections"
-              :collections="collections"
-              @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
-              @cancel-edit="isEditCollectionsOpen = false"
-            />
-          </div>
-        </section>
-      </div>
-
-      <div class="flex flex-col items-center gap-5 col-span-2 row-start-2">
-        <!-- Title and description section -->
-        <section class="w-full bg-light rounded-xl shadow-lg outline outline-gray-200">
-          <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
-            <h2 class="font-semibold">Product info</h2>
-            <div class="text-end">
-              <ItemActions
-                :itemId="productQuery.data.value.product.id"
-                :allow-edit="true"
-                :allow-delete="true"
-                @edit-item="isEditProductOpen = true"
-                @delete-item="
-                  () =>
-                    openConfirmPopover(
-                      'delete:product',
-                      props.id,
-                      'This action will permanently delete your product. Continue?',
-                    )
-                "
-              />
-            </div>
-          </div>
-          <div class="p-3">
-            <p>Title</p>
-            <p id="title" class="border border-gray-300 rounded p-1 w-full mt-1">
-              {{ title }}
-            </p>
-          </div>
-          <div class="p-3">
-            <p>Description</p>
-            <p id="description" class="resize-none border border-gray-300 rounded p-1 w-full mt-1">
-              {{ description }}
-            </p>
-          </div>
-
-          <EditProductDialog
-            :is-open="isEditProductOpen"
-            :product-id="productQuery.data.value.product.id"
-            :title="title"
-            :description="description"
-            @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
-            @cancel-edit="isEditProductOpen = false"
+        <div>
+          <TableComponent
+            v-if="options.length"
+            :table="optionTable"
+            :is-loading="false"
+            :include-headers="false"
           />
-        </section>
 
-        <!-- Options section -->
-        <section class="w-full bg-light rounded-xl shadow-lg outline outline-gray-200">
-          <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
-            <h2 class="font-semibold">Options</h2>
-            <button
-              type="button"
-              class="bg-light outline outline-gray-200 rounded-md py-1 px-2 hover:bg-cool-gray"
-              @click.prevent="isCreateOptionOpen = true"
-            >
-              Create
-            </button>
-          </div>
+          <CreateOptionDialog
+            :is-open="isCreateOptionOpen"
+            @save="(payload) => handleSubmit({ action: 'create:option', ...payload })"
+            @cancel="isCreateOptionOpen = false"
+          />
 
-          <div>
-            <TableComponent
-              v-if="options.length"
-              :table="optionTable"
-              :is-loading="false"
-              :include-headers="false"
-            />
+          <EditOptionDialog
+            :is-open="isEditOptionOpen"
+            :option-id="activeEditOption?.id"
+            :name="activeEditOption?.name"
+            :values="activeEditOption?.values"
+            @save-edit="(payload) => handleSubmit({ action: 'update:option', ...payload })"
+            @cancel-edit="isEditOptionOpen = false"
+          />
+        </div>
+      </section>
 
-            <CreateOptionDialog
-              :is-open="isCreateOptionOpen"
-              @save="(payload) => handleSubmit({ action: 'create:option', ...payload })"
-              @cancel="isCreateOptionOpen = false"
-            />
+      <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow">
+        <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
+          <h2 class="font-semibold">Variants</h2>
+          <button
+            type="button"
+            class="bg-light outline outline-gray-200 rounded-md py-1 px-2 hover:bg-cool-gray"
+            @click.prevent="isCreateVariantOpen = true"
+          >
+            Create
+          </button>
+        </div>
 
-            <EditOptionDialog
-              :is-open="isEditOptionOpen"
-              :option-id="activeEditOption?.id"
-              :name="activeEditOption?.name"
-              :values="activeEditOption?.values"
-              @save-edit="(payload) => handleSubmit({ action: 'update:option', ...payload })"
-              @cancel-edit="isEditOptionOpen = false"
-            />
-          </div>
-        </section>
+        <div>
+          <TableComponent
+            v-if="variants.length"
+            :table="variantsTable"
+            :is-loading="false"
+            :include-headers="true"
+          />
 
-        <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow">
-          <div class="flex items-center justify-between p-3 border-b border-b-gray-200">
-            <h2 class="font-semibold">Variants</h2>
-            <button
-              type="button"
-              class="bg-light outline outline-gray-200 rounded-md py-1 px-2 hover:bg-cool-gray"
-              @click.prevent="isCreateVariantOpen = true"
-            >
-              Create
-            </button>
-          </div>
+          <CreateVariantDialog
+            :is-open="isCreateVariantOpen"
+            :currency-symbol="currencyInfo.symbol"
+            :options="options"
+            @save="(payload) => handleSubmit({ action: 'create:variant', ...payload })"
+            @cancel="isCreateVariantOpen = false"
+          />
 
-          <div>
-            <TableComponent
-              v-if="variants.length"
-              :table="variantsTable"
-              :is-loading="false"
-              :include-headers="true"
-            />
-
-            <CreateVariantDialog
-              :is-open="isCreateVariantOpen"
-              :currency-symbol="currencyInfo.symbol"
-              :options="options"
-              @save="(payload) => handleSubmit({ action: 'create:variant', ...payload })"
-              @cancel="isCreateVariantOpen = false"
-            />
-
-            <EditVariantDialog
-              v-model:is-open="isEditVariantOpen"
-              :currency-symbol="currencyInfo.symbol"
-              :variant-id="activeEditVariant?.id"
-              :options="options"
-              :selected-values="activeEditVariant?.selectedValues"
-              :title="activeEditVariant?.title"
-              :inventory-quantity="activeEditVariant?.inventoryQuantity"
-              :sku="activeEditVariant?.sku"
-              :price="activeEditVariant?.price"
-              @save="(payload) => handleSubmit({ action: 'update:variant', ...payload })"
-              @cancel="isEditVariantOpen = false"
-            />
-          </div>
-        </section>
-      </div>
+          <EditVariantDialog
+            v-model:is-open="isEditVariantOpen"
+            :currency-symbol="currencyInfo.symbol"
+            :variant-id="activeEditVariant?.id"
+            :options="options"
+            :selected-values="activeEditVariant?.selectedValues"
+            :title="activeEditVariant?.title"
+            :inventory-quantity="activeEditVariant?.inventoryQuantity"
+            :sku="activeEditVariant?.sku"
+            :price="activeEditVariant?.price"
+            @save="(payload) => handleSubmit({ action: 'update:variant', ...payload })"
+            @cancel="isEditVariantOpen = false"
+          />
+        </div>
+      </section>
     </div>
-  </template>
+  </div>
 </template>
 
 <style lang="css" scoped>

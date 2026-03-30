@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { currencyInfo } from '@/lib/currencyInfo'
 import {
   Listbox,
@@ -40,7 +40,6 @@ const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0(
 
 const title = ref('')
 const description = ref('')
-const collections = ref<CollectionPreview[]>([])
 const selectedCollections = ref<CollectionPreview[]>([])
 const productStatus = ref(false)
 const defaultVariant = ref({
@@ -54,6 +53,7 @@ const isEditVariantOpen = ref(false)
 const activeEditVariantId = ref()
 const isLoading = ref(false)
 
+const collections = computed(() => collectionsQuery.data.value?.collections ?? [])
 const validOptions = computed(() =>
   options.value.filter((option) => option.values.some((value) => value.name.length)),
 )
@@ -61,16 +61,11 @@ const activeEditVariant = computed(() =>
   variants.value.find((v) => v.id === activeEditVariantId.value),
 )
 
-const queryClient = useQueryClient()
 const columnHelper = createColumnHelper<ProductVariantCreateForm>()
 
-const {
-  isPending,
-  isError,
-  data: queryData,
-  isSuccess,
-  error,
-} = useQuery({
+const queryClient = useQueryClient()
+
+const collectionsQuery = useQuery({
   queryKey: ['collections'],
   queryFn: fetchCollections,
 })
@@ -158,8 +153,8 @@ const revalidateProducts = async () => {
     await queryClient.invalidateQueries({ queryKey: ['products'] }, { throwOnError: true })
   } catch (e) {
     ElNotification({
-      title: 'Error refetching products',
-      message: `${e}`,
+      title: 'Refresh page',
+      message: `Error refetching products: ${e}`,
       type: 'error',
       position: 'bottom-right',
     })
@@ -177,7 +172,7 @@ const handleSubmit = async () => {
         if (!defaultVariant.value.price || !defaultVariant.value.quantity) {
           throw new Error(`Missing input for price and/or quantity.`)
         }
-        await newProductMutation.mutate({
+        await newProductMutation.mutateAsync({
           token,
           newProduct: {
             status: productStatus.value,
@@ -212,7 +207,7 @@ const handleSubmit = async () => {
           },
         })
       } else {
-        await newProductMutation.mutate({
+        await newProductMutation.mutateAsync({
           token,
           newProduct: {
             status: productStatus.value,
@@ -260,6 +255,7 @@ const handleSubmit = async () => {
       console.log(e)
       ElNotification({
         title: `Error creating product: ${title.value}`,
+        message: `${e}`,
         type: 'error',
         position: 'bottom-right',
       })
@@ -277,19 +273,9 @@ const handleSubmit = async () => {
           loginWithRedirect()
         }
       })
-      .catch()
+      .catch((reason) => console.log(reason))
   }
 }
-
-watch(
-  isSuccess,
-  (isSuccess) => {
-    if (isSuccess && queryData.value) {
-      collections.value = queryData.value.collections
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>
@@ -373,10 +359,12 @@ watch(
       <!-- Product organization/collections -->
       <section class="bg-light rounded-xl shadow-lg p-3 min-w-0 col-start-3">
         <h2 class="font-semibold mb-4">Product organization</h2>
-        <div v-if="isPending">Loading...</div>
-        <div v-else-if="isError">An error has occured: {{ error }}</div>
+        <div v-if="collectionsQuery.isPending.value">Loading...</div>
+        <div v-else-if="collectionsQuery.isError.value">
+          An error has occured: {{ collectionsQuery.error.value }}
+        </div>
         <Listbox
-          v-else-if="queryData"
+          v-else-if="collectionsQuery.data.value"
           v-model="selectedCollections"
           name="selected-collections"
           multiple
