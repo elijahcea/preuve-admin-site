@@ -46,9 +46,9 @@ const handleInputConfirm = () => {
         message: 'Value already exists',
         type: 'error',
       })
-      return
+    } else {
+      normalizedValues.value.push({ name: inputValue.value })
     }
-    normalizedValues.value.push({ name: inputValue.value })
   }
   inputVisible.value = false
   inputValue.value = ''
@@ -125,7 +125,7 @@ watch(
                     ref="InputRef"
                     v-model="inputValue"
                     size="small"
-                    @keyup.enter.prevent="handleInputConfirm"
+                    @keydown.enter.prevent="handleInputConfirm"
                     @blur="handleInputConfirm"
                   />
                   <el-button
