@@ -1,27 +1,27 @@
+import HomeDashboard from '@/views/HomeDashboard.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/routes/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', name: 'home', component: HomeView },
+    { path: '/', name: 'home', component: HomeDashboard },
     {
       path: '/products',
       children: [
         {
           path: '',
           name: 'products',
-          component: () => import('@/routes/products/ProductsView.vue'),
+          component: () => import('@/views/products/ProductsList.vue'),
         },
         {
           path: 'new',
           name: 'newProduct',
-          component: () => import('@/routes/products/NewProductView.vue'),
+          component: () => import('@/views/products/NewProduct.vue'),
         },
         {
           path: ':id',
           name: 'productDetails',
-          component: () => import('@/routes/products/ProductDetailsView.vue'),
+          component: () => import('@/views/products/ProductDetails.vue'),
           props: true,
         },
       ],
@@ -32,17 +32,17 @@ const router = createRouter({
         {
           path: '',
           name: 'collections',
-          component: () => import('@/routes/collections/CollectionsView.vue'),
+          component: () => import('@/views/collections/CollectionsList.vue'),
         },
         {
           path: 'new',
           name: 'newCollection',
-          component: () => import('@/routes/collections/NewCollectionView.vue'),
+          component: () => import('@/views/collections/NewCollection.vue'),
         },
         {
           path: ':id',
           name: 'collectionDetails',
-          component: () => import('@/routes/collections/CollectionDetailsView.vue'),
+          component: () => import('@/views/collections/CollectionDetails.vue'),
           props: true,
         },
       ],
