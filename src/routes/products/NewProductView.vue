@@ -85,7 +85,7 @@ const newProductMutation = useMutation({
 })
 
 const columns = [
-  columnHelper.accessor((row) => row.optionValues.map((value) => value.name).join(' / '), {
+  columnHelper.accessor((row) => row.selectedValues.map((value) => value.name).join(' / '), {
     header: 'Title',
   }),
   columnHelper.accessor('sku', {
@@ -131,7 +131,7 @@ const variantsTable = useVueTable({
   getCoreRowModel: getCoreRowModel(),
 })
 
-const saveVariantEdit = (updatedVariantInfo: Omit<ProductVariantCreateForm, 'optionValues'>) => {
+const saveVariantEdit = (updatedVariantInfo: Omit<ProductVariantCreateForm, 'selectedValues'>) => {
   const existingVariantIdx = variants.value.findIndex(
     (variant) => variant.id === updatedVariantInfo.id,
   )
@@ -200,7 +200,7 @@ const handleSubmit = async () => {
                 sku: defaultVariant.value.sku,
                 price: defaultVariant.value.price,
                 inventoryQuantity: defaultVariant.value.quantity,
-                optionValues: [
+                selectedValues: [
                   {
                     name: 'Default option value',
                     optionName: 'Default option',
@@ -230,7 +230,7 @@ const handleSubmit = async () => {
                 sku: variant.sku,
                 price: variant.price,
                 inventoryQuantity: variant.inventoryQuantity,
-                optionValues: variant.optionValues.map((value) => {
+                selectedValues: variant.selectedValues.map((value) => {
                   const parentOption = options.value.find((option) => option.id === value.optionId)
                   if (!parentOption) throw new Error('Option value requires parent option name')
                   return {

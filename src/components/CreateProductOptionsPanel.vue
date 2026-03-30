@@ -78,7 +78,7 @@ const generateCartesianVariants = (options: OptionCreateForm[]) => {
       price: 0,
       sku: null,
       inventoryQuantity: 0,
-      optionValues: comboValues,
+      selectedValues: comboValues,
     }
   })
 }
@@ -92,7 +92,7 @@ const reconcileVariants = (
 
   return variantSkeletons.map((skeleton) => {
     const ancestor = currentVariants.find((oldVar) => {
-      const isMatch = isVariantMatch(skeleton.optionValues, oldVar.optionValues)
+      const isMatch = isVariantMatch(skeleton.selectedValues, oldVar.selectedValues)
       const isAvailable = !claimedVariantIds.has(oldVar.id)
       return isMatch && isAvailable
     })
@@ -114,8 +114,8 @@ const reconcileVariants = (
 
     for (const oldVar of currentVariants) {
       let sharedCount = 0
-      for (const newOptionValue of skeleton.optionValues) {
-        const matchingValue = oldVar.optionValues.find((o) => o.id === newOptionValue.id)
+      for (const newOptionValue of skeleton.selectedValues) {
+        const matchingValue = oldVar.selectedValues.find((o) => o.id === newOptionValue.id)
         if (matchingValue && matchingValue.optionId === newOptionValue.optionId) {
           sharedCount++
         }
