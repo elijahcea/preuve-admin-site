@@ -31,10 +31,10 @@ import { postNewProduct } from '@/api/mutations'
 import router from '@/router'
 import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-table'
 import PriceInput from '@/components/PriceInput.vue'
-import EditVariantDialog from '@/components/dialogs/EditVariantDialog.vue'
 import PriceCell from '@/components/cells/PriceCell.vue'
 import { ElNotification, ElTag, ElMessageBox } from 'element-plus'
 import { useAuth0 } from '@auth0/auth0-vue'
+import EditNewProductVariant from '@/components/dialogs/EditNewProductVariant.vue'
 
 const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
@@ -85,7 +85,7 @@ const newProductMutation = useMutation({
 })
 
 const columns = [
-  columnHelper.accessor((row) => row.selectedValues.map((value) => value.name).join(' / '), {
+  columnHelper.accessor('title', {
     header: 'Title',
   }),
   columnHelper.accessor('sku', {
@@ -197,6 +197,7 @@ const handleSubmit = async () => {
             ],
             variants: [
               {
+                title: 'Default variant',
                 sku: defaultVariant.value.sku,
                 price: defaultVariant.value.price,
                 inventoryQuantity: defaultVariant.value.quantity,
@@ -227,6 +228,7 @@ const handleSubmit = async () => {
             })),
             variants: variants.value.map((variant) => {
               return {
+                title: variant.title,
                 sku: variant.sku,
                 price: variant.price,
                 inventoryQuantity: variant.inventoryQuantity,
@@ -292,8 +294,8 @@ watch(
 
 <template>
   <!-- Heading -->
-  <div v-loading="isLoading" class="max-w-4xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container">
-    <div class="flex items-center w-full gap-3">
+  <div v-loading="isLoading" class="max-w-5xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container">
+    <div class="flex items-center w-full gap-3 col-span-2">
       <RouterLink
         :to="{ name: 'products' }"
         class="p-1 hover:bg-current/20 rounded border border-gray-400"
@@ -479,15 +481,15 @@ watch(
             v-if="validOptions.length"
             class="bg-light outline outline-gray-200 rounded-xl shadow"
           >
-            <EditVariantDialog
+            <EditNewProductVariant
               v-model:is-open="isEditVariantOpen"
               :currency-symbol="currencyInfo.symbol"
-              :variant-id="activeEditVariant?.id"
+              :id="activeEditVariant?.id"
               :inventory-quantity="activeEditVariant?.inventoryQuantity"
               :sku="activeEditVariant?.sku"
               :price="activeEditVariant?.price"
-              @save-variant-edit="saveVariantEdit"
-              @cancel-edit="cancelVariantEdit"
+              @save="saveVariantEdit"
+              @cancel="cancelVariantEdit"
             />
             <div>
               <TableComponent :table="variantsTable" :is-loading="false" :include-headers="true" />

@@ -197,7 +197,13 @@ const optionColumns = [
             activeEditOptionId.value = props.row.id
             isEditOptionOpen.value = true
           }}
-          onDeleteItem={() => openConfirmPopover('delete:option', props.row.id)}
+          onDeleteItem={() =>
+            openConfirmPopover(
+              'delete:option',
+              props.row.id,
+              'This action will permanently delete the option. Continue?',
+            )
+          }
         />
       </div>
     ),
@@ -205,7 +211,7 @@ const optionColumns = [
 ]
 
 const variantColumns = [
-  variantColumnHelper.accessor((row) => row.selectedValues.map((value) => value.name).join(' / '), {
+  variantColumnHelper.accessor('title', {
     header: 'Title',
   }),
   variantColumnHelper.accessor('sku', {
@@ -238,7 +244,13 @@ const variantColumns = [
             activeEditVariantId.value = props.row.id
             isEditVariantOpen.value = true
           }}
-          onDeleteItem={() => openConfirmPopover('delete:variant', props.row.id)}
+          onDeleteItem={() =>
+            openConfirmPopover(
+              'delete:variant',
+              props.row.id,
+              'This action will permanently delete the variant. Continue?',
+            )
+          }
         />
       </div>
     ),
@@ -273,8 +285,8 @@ const revalidateProduct = async () => {
   }
 }
 
-const openConfirmPopover = (action: DeleteAction, id: string) => {
-  ElMessageBox.confirm('This action will permanently delete and cannot be undone. Continue?', {
+const openConfirmPopover = (action: DeleteAction, id: string, message: string) => {
+  ElMessageBox.confirm(message, {
     confirmButtonText: 'Delete',
     cancelButtonText: 'Cancel',
     type: 'warning',
@@ -343,6 +355,13 @@ const handleSubmit = async (
       }
 
       await revalidateProduct()
+
+      ElNotification({
+        title: 'Success',
+        message: `The write operation was successful`,
+        type: 'error',
+        position: 'bottom-right',
+      })
       isLoading.value = false
     } catch (e) {
       console.log(e)
@@ -394,6 +413,13 @@ const handleDelete = async (action: DeleteAction, id: string) => {
       }
 
       await revalidateProduct()
+
+      ElNotification({
+        title: 'Success',
+        message: `The delete operation was successful`,
+        type: 'success',
+        position: 'bottom-right',
+      })
       isLoading.value = false
     } catch (e) {
       console.log(e)
@@ -523,7 +549,14 @@ const handleDelete = async (action: DeleteAction, id: string) => {
                 :allow-edit="true"
                 :allow-delete="true"
                 @edit-item="isEditProductOpen = true"
-                @delete-item="() => openConfirmPopover('delete:product', props.id)"
+                @delete-item="
+                  () =>
+                    openConfirmPopover(
+                      'delete:product',
+                      props.id,
+                      'This action will permanently delete your product. Continue?',
+                    )
+                "
               />
             </div>
           </div>
@@ -622,11 +655,12 @@ const handleDelete = async (action: DeleteAction, id: string) => {
               :variant-id="activeEditVariant?.id"
               :options="options"
               :selected-values="activeEditVariant?.selectedValues"
+              :title="activeEditVariant?.title"
               :inventory-quantity="activeEditVariant?.inventoryQuantity"
               :sku="activeEditVariant?.sku"
               :price="activeEditVariant?.price"
-              @save-edit="(payload) => handleSubmit({ action: 'update:variant', ...payload })"
-              @cancel-edit="isEditVariantOpen = false"
+              @save="(payload) => handleSubmit({ action: 'update:variant', ...payload })"
+              @cancel="isEditVariantOpen = false"
             />
           </div>
         </section>
