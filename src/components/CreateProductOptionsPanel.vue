@@ -75,6 +75,7 @@ const generateCartesianVariants = (options: OptionCreateForm[]) => {
   return combinations.map((comboValues) => {
     return {
       id: `variant_${crypto.randomUUID()}`,
+      title: comboValues.map((value) => value.name).join(' / '),
       price: 0,
       sku: null,
       inventoryQuantity: 0,

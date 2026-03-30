@@ -15,6 +15,7 @@ export type ProductOptionValue = {
 
 export type ProductVariant = {
   id: string
+  title: string
   sku: string | null
   productTitle: string
   price: number
@@ -117,6 +118,7 @@ export type OptionValueCreateInput = {
 }
 
 export interface ProductVariantCreateDTO {
+  title: string
   sku: string | null
   price: number
   inventoryQuantity: number
@@ -165,6 +167,7 @@ export type OptionValueUpdateInput = {
 }
 
 export interface ProductVariantUpdateDTO {
+  title?: string
   sku?: string | null
   price?: number
   inventoryQuantity?: number
@@ -213,6 +216,7 @@ export type UpdateOptionResponse = Pick<ProductResponses, 'product'>
 // Form types
 export type ProductVariantCreateForm = {
   id: string
+  title: string
   price: number
   sku: string | null
   inventoryQuantity: number
