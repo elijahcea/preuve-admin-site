@@ -1,4 +1,6 @@
 import type {
+  CollectionCreateDTO,
+  CollectionUpdateDTO,
   CreateProductResponse,
   OptionCreateDTO,
   OptionUpdateDTO,
@@ -14,6 +16,15 @@ export async function postNewProduct(
   newProduct: ProductCreateDTO,
 ): Promise<CreateProductResponse> {
   const response = await axios.post(`${import.meta.env.VITE_PRODUCTS_API_URL}`, newProduct, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return response.data
+}
+
+export async function createCollection(token: string, newCollection: CollectionCreateDTO) {
+  const response = await axios.post(`${import.meta.env.VITE_COLLECTIONS_API_URL}`, newCollection, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -57,6 +68,23 @@ export async function deleteOption(token: string, productId: string, optionId: s
 export async function deleteVariant(token: string, productId: string, variantId: string) {
   const response = await axios.delete(
     `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/variants/${variantId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  )
+  return response.data
+}
+
+export async function updateCollection(
+  token: string,
+  collectionId: string,
+  updatedCollection: CollectionUpdateDTO,
+) {
+  const response = await axios.put(
+    `${import.meta.env.VITE_COLLECTIONS_API_URL}/${collectionId}`,
+    updatedCollection,
     {
       headers: {
         Authorization: `Bearer ${token}`,
