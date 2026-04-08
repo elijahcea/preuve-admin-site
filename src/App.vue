@@ -8,7 +8,7 @@ import NavBar from './components/NavBar.vue'
   <HeaderComponent />
   <div class="grid grid-cols-1 md:grid-cols-[1fr_6fr] text-xs md:text-sm content-container">
     <NavBar />
-    <main class="grow p-3 bg-background overflow-y-auto">
+    <main class="grow p-6 bg-background overflow-y-auto">
       <RouterView />
     </main>
   </div>
