@@ -458,10 +458,10 @@ const handleDelete = async (action: DeleteAction, id: string) => {
   <div
     v-else-if="productQuery.data.value"
     v-loading="productQuery.isPending.value || isLoading"
-    class="max-w-7xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container"
+    class="max-w-7xl mx-auto mb-5 grid grid-cols-1 md:grid-cols-3 gap-5 grid-container"
   >
     <!-- Heading -->
-    <div class="flex items-center w-full gap-3 col-span-2">
+    <div class="flex items-center w-full gap-3 md:col-span-2">
       <RouterLink
         :to="{ name: 'products' }"
         class="p-1 hover:bg-current/20 rounded border border-gray-400"
@@ -472,7 +472,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
       <StatusLabel :status="productStatus" />
     </div>
 
-    <div class="flex flex-col gap-3 col-start-3 row-start-2">
+    <div class="flex flex-col gap-3 md:col-start-3 md:row-start-2">
       <!-- Product status -->
       <section class="w-full bg-light outline outline-gray-200 rounded-xl shadow">
         <div class="flex items-center justify-between p-3 border-b border-gray-200">
@@ -540,7 +540,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
       </section>
     </div>
 
-    <div class="flex flex-col items-center gap-5 col-span-2 row-start-2">
+    <div class="flex flex-col items-center gap-5 md:col-span-2 md:row-start-2">
       <!-- Title and description section -->
       <section class="w-full bg-light rounded-xl shadow-lg outline outline-gray-200">
         <div class="flex items-center justify-between p-3 border-b border-b-gray-200">

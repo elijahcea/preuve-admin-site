@@ -280,8 +280,11 @@ const handleSubmit = async () => {
 
 <template>
   <!-- Heading -->
-  <div v-loading="isLoading" class="max-w-5xl mx-auto mb-5 grid grid-cols-3 gap-5 grid-container">
-    <div class="flex items-center w-full gap-3 col-span-2">
+  <div
+    v-loading="isLoading"
+    class="max-w-5xl mx-auto mb-5 grid grid-cols-1 md:grid-cols-3 gap-5 grid-container"
+  >
+    <div class="flex items-center w-full gap-3 md:col-span-2">
       <RouterLink
         :to="{ name: 'products' }"
         class="p-1 hover:bg-current/20 rounded border border-gray-400"
@@ -293,7 +296,7 @@ const handleSubmit = async () => {
     </div>
 
     <!-- Save changes or discard buttons -->
-    <div class="col-start-3">
+    <div class="max-md:justify-self-center max-md:row-start-4 md:col-start-3">
       <RouterLink :to="{ name: 'products' }">
         <button class="font-semibold rounded-md bg-cool-gray py-1 px-2 hover:opacity-80">
           Discard
@@ -308,7 +311,7 @@ const handleSubmit = async () => {
       </button>
     </div>
 
-    <div class="flex flex-col gap-3 col-start-3">
+    <div class="flex flex-col gap-3 md:col-start-3">
       <!-- Product status -->
       <section class="bg-light rounded-xl shadow-lg p-3">
         <Listbox v-model="productStatus" name="product-status">
@@ -357,7 +360,7 @@ const handleSubmit = async () => {
       </section>
 
       <!-- Product organization/collections -->
-      <section class="bg-light rounded-xl shadow-lg p-3 min-w-0 col-start-3">
+      <section class="bg-light rounded-xl shadow-lg p-3 min-w-0 md:col-start-3">
         <h2 class="font-semibold mb-4">Product organization</h2>
         <div v-if="collectionsQuery.isPending.value">Loading...</div>
         <div v-else-if="collectionsQuery.isError.value">
@@ -420,7 +423,7 @@ const handleSubmit = async () => {
       </section>
     </div>
 
-    <div class="flex flex-col items-center gap-5 col-span-2 row-start-2">
+    <div class="flex flex-col items-center gap-5 md:col-span-2 md:row-start-2">
       <div v-if="newProductMutation.isPending.value">Creating new product...</div>
       <form
         v-else

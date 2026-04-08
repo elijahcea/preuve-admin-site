@@ -24,7 +24,7 @@ const emit = defineEmits(['editItem', 'deleteItem'])
       leave-to-class="transform scale-95 opacity-0"
     >
       <MenuItems
-        class="absolute mt-1 w-min-content rounded-md bg-white outline outline-gray-100 shadow-lg divide-y divide-gray-100 z-10"
+        class="absolute right-0 w-min-content rounded-md bg-white outline outline-gray-100 shadow-lg divide-y divide-gray-100 z-10"
       >
         <MenuItem v-if="allowEdit" as="div" class="p-1" v-slot="{ active }">
           <button

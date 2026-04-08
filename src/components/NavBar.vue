@@ -8,21 +8,27 @@ const activeStyles = 'bg-light outline outline-gray-200'
 
 <template>
   <nav
-    class="pt-3 px-2 min-w-3xs bg-(--nav-bg) inset-shadow-sm font-semibold border-r border-r-gray-200"
+    class="max-md:hidden pt-3 px-2 min-w-50 bg-(--nav-bg) inset-shadow-sm font-semibold border-r border-r-gray-200"
   >
     <ul>
-      <RouterLink to="/" :class="itemStyles" :active-class="activeStyles">
-        <HomeIcon :class="iconSize"></HomeIcon>
-        <p>Home</p>
-      </RouterLink>
-      <RouterLink :to="{ name: 'products' }" :class="itemStyles" :active-class="activeStyles">
-        <ShoppingBagIcon :class="iconSize"></ShoppingBagIcon>
-        <p>Products</p>
-      </RouterLink>
-      <RouterLink :to="{ name: 'collections' }" :class="itemStyles" :active-class="activeStyles">
-        <TagIcon :class="iconSize"></TagIcon>
-        <p>Collections</p>
-      </RouterLink>
+      <li>
+        <RouterLink to="/" :class="itemStyles" :active-class="activeStyles">
+          <HomeIcon :class="iconSize"></HomeIcon>
+          <p>Home</p>
+        </RouterLink>
+      </li>
+      <li>
+        <RouterLink :to="{ name: 'products' }" :class="itemStyles" :active-class="activeStyles">
+          <ShoppingBagIcon :class="iconSize"></ShoppingBagIcon>
+          <p>Products</p>
+        </RouterLink>
+      </li>
+      <li>
+        <RouterLink :to="{ name: 'collections' }" :class="itemStyles" :active-class="activeStyles">
+          <TagIcon :class="iconSize"></TagIcon>
+          <p>Collections</p>
+        </RouterLink>
+      </li>
     </ul>
   </nav>
 </template>
