@@ -20,7 +20,7 @@ const isOpen = ref(false)
 
 <template>
   <header
-    class="bg-foreground text-background min-h-15 grid grid-cols-[1fr_2fr_1fr] md:grid-cols-1 items-center px-4 gap-1"
+    class="bg-foreground text-background min-h-15 grid grid-cols-[1fr_2fr_1fr] md:grid-cols-2 items-center px-4 gap-1"
   >
     <nav class="md:hidden">
       <button
@@ -116,7 +116,7 @@ const isOpen = ref(false)
         </Dialog>
       </TransitionRoot>
     </nav>
-    <div class="flex gap-2 items-center font-semibold justify-center">
+    <div class="flex gap-2 items-center font-semibold justify-center md:justify-start">
       <BuildingStorefrontIcon class="size-5" />
       <RouterLink :to="{ name: 'home' }">Preuve Admin</RouterLink>
     </div>
