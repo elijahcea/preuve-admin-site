@@ -56,7 +56,6 @@ watch(
         price,
       }
       activeValues.value = selectedValues.map((v) => v)
-      console.log(variantInfo.value)
     }
   },
 )
