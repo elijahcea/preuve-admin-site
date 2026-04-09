@@ -137,7 +137,7 @@ export async function updateVariant(
   updatedVariant: ProductVariantUpdateDTO,
 ) {
   const response = await axios.put(
-    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/options/${variantId}`,
+    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/variants/${variantId}`,
     updatedVariant,
     {
       headers: {
@@ -150,7 +150,7 @@ export async function updateVariant(
 
 export async function createOption(token: string, productId: string, option: OptionCreateDTO) {
   const response = await axios.post(
-    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/options/`,
+    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/options`,
     option,
     {
       headers: {
@@ -167,7 +167,7 @@ export async function createVariant(
   variant: ProductVariantCreateDTO,
 ) {
   const response = await axios.post(
-    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/variants/`,
+    `${import.meta.env.VITE_PRODUCTS_API_URL}/${productId}/variants`,
     variant,
     {
       headers: {
