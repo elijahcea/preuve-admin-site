@@ -56,7 +56,6 @@ const revalidateCollections = async () => {
 }
 
 const handleSubmit = async () => {
-  console.log(selectedProducts.value)
   if (isAuthenticated.value) {
     try {
       isLoading.value = true
