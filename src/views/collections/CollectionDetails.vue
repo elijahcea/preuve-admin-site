@@ -89,7 +89,7 @@ const handleSubmit = async () => {
       ElNotification({
         title: 'Success',
         message: `The write operation was successful`,
-        type: 'error',
+        type: 'success',
         position: 'bottom-right',
       })
       isLoading.value = false
