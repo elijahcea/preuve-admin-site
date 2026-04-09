@@ -27,7 +27,11 @@ import StatusLabel from '@/components/StatusLabel.vue'
 import CreateProductOptionsPanel from '@/components/CreateProductOptionsPanel.vue'
 import TanstackTable from '@/components/TanstackTable.vue'
 import InventoryPanel from '@/components/InventoryPanel.vue'
-import { postNewProduct } from '@/api/mutations'
+import {
+  generateCloudinarySignature,
+  postNewProduct,
+  uploadImageToCloudinary,
+} from '@/api/mutations'
 import router from '@/router'
 import { createColumnHelper, useVueTable, getCoreRowModel } from '@tanstack/vue-table'
 import PriceInput from '@/components/PriceInput.vue'
@@ -35,6 +39,7 @@ import PriceCell from '@/components/cells/PriceCell.vue'
 import { ElNotification, ElTag, ElMessageBox } from 'element-plus'
 import { useAuth0 } from '@auth0/auth0-vue'
 import EditNewProductVariant from '@/components/dialogs/EditNewProductVariant.vue'
+import ImageInput from '@/components/ImageInput.vue'
 
 const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
@@ -47,6 +52,8 @@ const defaultVariant = ref({
   sku: null,
   quantity: null,
 })
+const file = ref<File | undefined>()
+const imageAlt = ref(null)
 const options = ref<OptionCreateForm[]>([])
 const variants = ref<ProductVariantCreateForm[]>([])
 const isEditVariantOpen = ref(false)
@@ -164,9 +171,14 @@ const revalidateProducts = async () => {
 const handleSubmit = async () => {
   if (isAuthenticated.value) {
     try {
+      let featuredImageUrl = null
       isLoading.value = true
 
       const token = await getAccessTokenSilently()
+
+      if (file.value) {
+        featuredImageUrl = await uploadImage(token, file.value)
+      }
 
       if (options.value.length < 1) {
         if (!defaultVariant.value.price || !defaultVariant.value.quantity) {
@@ -178,7 +190,10 @@ const handleSubmit = async () => {
             status: productStatus.value,
             title: title.value,
             description: description.value,
-            featuredImage: null,
+            featuredImage: {
+              url: featuredImageUrl,
+              altText: imageAlt.value,
+            },
             collectionIds: selectedCollections.value.map((collection) => collection.id),
             options: [
               {
@@ -213,7 +228,10 @@ const handleSubmit = async () => {
             status: productStatus.value,
             title: title.value,
             description: description.value,
-            featuredImage: null,
+            featuredImage: {
+              url: featuredImageUrl,
+              altText: imageAlt.value,
+            },
             collectionIds: selectedCollections.value.map((collection) => collection.id),
             options: options.value.map((option) => ({
               name: option.name,
@@ -274,6 +292,35 @@ const handleSubmit = async () => {
         }
       })
       .catch((reason) => console.log(reason))
+  }
+}
+
+const uploadImage = async (token: string, file: File) => {
+  try {
+    const signatureResult = await generateCloudinarySignature(token, {
+      file_size: file.size,
+      content_type: file.type,
+    })
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('api_key', signatureResult.apiKey)
+    formData.append('timestamp', `${signatureResult.timestamp}`)
+    formData.append('signature', signatureResult.signature)
+    formData.append('folder', signatureResult.folder)
+
+    const uploadResult = await uploadImageToCloudinary(formData)
+
+    return uploadResult.secure_url
+  } catch (e) {
+    console.log('File upload failed', e)
+    ElNotification({
+      title: `Error uploading image: ${title.value}`,
+      message: `${e}`,
+      type: 'error',
+      position: 'bottom-right',
+    })
+    return null
   }
 }
 </script>
@@ -429,10 +476,33 @@ const handleSubmit = async () => {
         v-else
         id="newProductForm"
         @submit.prevent="handleSubmit"
+        enctype="multipart/form-data"
         class="w-full text-sm flex flex-col gap-5"
       >
         <!-- Title and Description -->
         <TitleAndDescription v-model:title="title" v-model:description="description" />
+
+        <section class="bg-light rounded-xl shadow p-3">
+          <h2 class="font-semibold mb-4">Media</h2>
+
+          <div class="flex flex-col gap-1">
+            <label for="featured-image">Featured Image</label>
+            <ImageInput :model-value="file" />
+          </div>
+
+          <div v-if="file">
+            <label for="alt"
+              >Alt (Optionally provide a brief description of the image for improved
+              accessibility)</label
+            >
+            <input
+              id="alt"
+              type="text"
+              class="border border-gray-300 rounded p-1 w-full mt-1"
+              v-model="imageAlt"
+            />
+          </div>
+        </section>
 
         <Transition name="fade">
           <section v-if="!options.length" class="bg-light rounded-xl shadow p-3">
