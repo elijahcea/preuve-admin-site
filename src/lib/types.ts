@@ -196,6 +196,11 @@ export type CollectionUpdateInput = CollectionUpdateDTO & {
   id: string
 }
 
+export type GenerateSignatureDTO = {
+  file_size: number
+  content_type: string
+}
+
 // API Response Types
 interface ProductResponses {
   product: Product

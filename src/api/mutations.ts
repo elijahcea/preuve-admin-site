@@ -2,6 +2,7 @@ import type {
   CollectionCreateDTO,
   CollectionUpdateDTO,
   CreateProductResponse,
+  GenerateSignatureDTO,
   OptionCreateDTO,
   OptionUpdateDTO,
   ProductCreateDTO,
@@ -175,4 +176,30 @@ export async function createVariant(
     },
   )
   return response.data
+}
+
+export async function generateCloudinarySignature(token: string, input: GenerateSignatureDTO) {
+  const response = await fetch(`${import.meta.env.VITE_IMAGES_API_URL}`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  if (!response.ok) throw new Error('Failed to generate signature')
+
+  return response.json()
+}
+
+export async function uploadImageToCloudinary(formData: FormData) {
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${(import.meta.env.VITE_CLOUDINARY_CLOUD_NAME = 'dedr8n2bj')}/image/upload`,
+    {
+      method: 'POST',
+      body: formData,
+    },
+  )
+  if (!response.ok) throw new Error('Failed to upload image to Cloudinary')
+
+  return response.json()
 }
