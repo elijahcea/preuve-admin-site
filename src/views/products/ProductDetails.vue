@@ -45,6 +45,7 @@ type ProductUpdatePayload = {
   action: 'update:product'
   data: ProductUpdateDTO
 }
+
 type OptionUpdatePayload = {
   action: 'update:option'
   data: OptionUpdateDTO & { optionId: string }
@@ -359,7 +360,7 @@ const handleSubmit = async (
       ElNotification({
         title: 'Success',
         message: `The write operation was successful`,
-        type: 'error',
+        type: 'success',
         position: 'bottom-right',
       })
       isLoading.value = false
@@ -491,7 +492,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
         <EditStatusDialog
           :is-open="isEditStatusOpen"
           :status="productQuery.data.value.product.status"
-          @save-edit="(payload) => handleSubmit({ action: 'update:productStatus', ...payload })"
+          @save-edit="(payload) => handleSubmit({ action: 'update:product', data: payload })"
           @cancel-edit="isEditStatusOpen = false"
         />
       </section>
@@ -533,7 +534,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
             :is-open="isEditCollectionsOpen"
             :selected-collections="selectedCollections"
             :collections="collections"
-            @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
+            @save-edit="(payload) => handleSubmit({ action: 'update:product', data: payload })"
             @cancel-edit="isEditCollectionsOpen = false"
           />
         </div>
@@ -570,7 +571,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
         </div>
         <div class="p-3">
           <p>Description</p>
-          <p id="description" class="resize-none border border-gray-300 rounded p-1 w-full mt-1">
+          <p id="description" class="min-h-10 border border-gray-300 rounded p-1 w-full mt-1">
             {{ description }}
           </p>
         </div>
@@ -580,7 +581,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
           :product-id="productQuery.data.value.product.id"
           :title="title"
           :description="description"
-          @save-edit="(payload) => handleSubmit({ action: 'update:product', ...payload })"
+          @save-edit="(payload) => handleSubmit({ action: 'update:product', data: payload })"
           @cancel-edit="isEditProductOpen = false"
         />
       </section>
@@ -608,7 +609,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
 
           <CreateOptionDialog
             :is-open="isCreateOptionOpen"
-            @save="(payload) => handleSubmit({ action: 'create:option', ...payload })"
+            @save="(payload) => handleSubmit({ action: 'create:option', data: payload })"
             @cancel="isCreateOptionOpen = false"
           />
 
@@ -617,7 +618,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
             :option-id="activeEditOption?.id"
             :name="activeEditOption?.name"
             :values="activeEditOption?.values"
-            @save-edit="(payload) => handleSubmit({ action: 'update:option', ...payload })"
+            @save-edit="(payload) => handleSubmit({ action: 'update:option', data: payload })"
             @cancel-edit="isEditOptionOpen = false"
           />
         </div>
@@ -647,7 +648,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
             :is-open="isCreateVariantOpen"
             :currency-symbol="currencyInfo.symbol"
             :options="options"
-            @save="(payload) => handleSubmit({ action: 'create:variant', ...payload })"
+            @save="(payload) => handleSubmit({ action: 'create:variant', data: payload })"
             @cancel="isCreateVariantOpen = false"
           />
 
@@ -661,7 +662,7 @@ const handleDelete = async (action: DeleteAction, id: string) => {
             :inventory-quantity="activeEditVariant?.inventoryQuantity"
             :sku="activeEditVariant?.sku"
             :price="activeEditVariant?.price"
-            @save="(payload) => handleSubmit({ action: 'update:variant', ...payload })"
+            @save="(payload) => handleSubmit({ action: 'update:variant', data: payload })"
             @cancel="isEditVariantOpen = false"
           />
         </div>
