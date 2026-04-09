@@ -13,6 +13,7 @@ const { isOpen, currencySymbol, options } = defineProps<{
 
 const emit = defineEmits(['save', 'cancel'])
 
+const title = ref()
 const sku = ref(null)
 const inventoryQuantity = ref(null)
 const price = ref(null)
@@ -33,6 +34,7 @@ watch(
   () => isOpen,
   (val) => {
     if (val === true) {
+      title.value = null
       sku.value = null
       inventoryQuantity.value = null
       price.value = null
@@ -59,6 +61,7 @@ watch(
       <form
         @submit.prevent="
           emit('save', {
+            title,
             sku,
             inventoryQuantity,
             price,
@@ -78,6 +81,18 @@ watch(
         >
           <DialogPanel class="w-full max-w-md bg-background p-3 rounded-xl flex flex-col gap-2">
             <DialogTitle class="font-semibold mb-3">Create variant</DialogTitle>
+
+            <div class="text-sm">
+              <label class="my-1" for="variant-title">Title</label>
+              <input
+                required
+                v-model="title"
+                id="variant-title"
+                name="variant-title"
+                type="text"
+                class="border border-gray-300 rounded p-1 w-full my-1"
+              />
+            </div>
 
             <div class="flex justify-center gap-2 text-sm">
               <div class="w-full">
