@@ -151,9 +151,9 @@ watch(
       >
         <ArrowLeftIcon class="size-5" />
       </RouterLink>
-      <h1 class="font-bold text-xl truncate">{{ title || 'Title' }}</h1>
+      <h1 class="font-bold text-lg md:text-xl truncate">{{ title || 'Title' }}</h1>
     </div>
-    <form @submit.prevent="handleSubmit" class="w-full text-sm flex flex-col gap-5">
+    <form @submit.prevent="handleSubmit" class="w-full flex flex-col gap-5">
       <!-- Title and Description -->
       <TitleAndDescription v-model:title="title" v-model:description="description" />
 
@@ -218,7 +218,7 @@ watch(
         </Listbox>
       </section>
 
-      <div class="m-auto text-base">
+      <div class="m-auto text-sm md:text-base">
         <RouterLink :to="{ name: 'collections' }">
           <button class="rounded-md bg-cool-gray py-1 px-2 hover:opacity-80">Cancel</button>
         </RouterLink>

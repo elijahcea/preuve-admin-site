@@ -39,7 +39,7 @@ watch(
       </TransitionChild>
       <form
         @submit.prevent="emit('saveEdit', { title: productTitle, description: productDescription })"
-        class="fixed inset-0 flex min-h-full items-center justify-center"
+        class="fixed inset-0 flex min-h-full items-center justify-center text-xs md:text-sm"
       >
         <TransitionChild
           as="template"
@@ -53,7 +53,7 @@ watch(
           <DialogPanel class="w-full max-w-md bg-background p-3 rounded-xl">
             <DialogTitle class="font-semibold mb-3">Edit product info</DialogTitle>
 
-            <div class="flex flex-col justify-center gap-2 text-sm">
+            <div class="flex flex-col justify-center gap-2">
               <div class="w-full">
                 <label for="title-edit">Title</label>
                 <input

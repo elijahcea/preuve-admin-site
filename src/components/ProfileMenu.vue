@@ -36,7 +36,7 @@ const handleLogout = () => {
           <button
             :class="[
               { 'bg-gray-100': active },
-              'w-full font-medium text-sm rounded-md p-2 flex items-center gap-2',
+              'w-full font-medium rounded-md p-2 flex items-center gap-2',
             ]"
             @click.prevent="
               () => {

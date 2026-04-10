@@ -497,7 +497,7 @@ const uploadImage = async (token: string, file: File) => {
         id="newProductForm"
         @submit.prevent="handleSubmit"
         enctype="multipart/form-data"
-        class="w-full text-sm flex flex-col gap-5"
+        class="w-full flex flex-col gap-5"
       >
         <!-- Title and Description -->
         <TitleAndDescription v-model:title="title" v-model:description="description" />

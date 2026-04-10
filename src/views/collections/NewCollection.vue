@@ -119,7 +119,7 @@ const handleSubmit = async () => {
       </RouterLink>
       <h1 class="font-bold text-xl">Create collection</h1>
     </div>
-    <form @submit.prevent="handleSubmit" class="w-full text-sm flex flex-col gap-5">
+    <form @submit.prevent="handleSubmit" class="w-full flex flex-col gap-5">
       <TitleAndDescription v-model:title="title" v-model:description="description" />
 
       <section class="bg-light rounded-xl shadow-lg p-3 min-w-0">
@@ -184,7 +184,7 @@ const handleSubmit = async () => {
         </Listbox>
       </section>
 
-      <div class="m-auto text-base">
+      <div class="m-auto text-sm md:text-base">
         <RouterLink :to="{ name: 'collections' }">
           <button class="rounded-md bg-cool-gray py-1 px-2 hover:opacity-80">Cancel</button>
         </RouterLink>

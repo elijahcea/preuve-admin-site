@@ -22,7 +22,7 @@ watch(
 </script>
 
 <template>
-  <div class="text-sm">
+  <div>
     <label :for="option.name + '-select'">{{ option.name }}</label>
 
     <select

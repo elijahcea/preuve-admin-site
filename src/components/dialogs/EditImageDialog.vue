@@ -38,7 +38,7 @@ watch(
       </TransitionChild>
       <form
         @submit.prevent="emit('saveEdit', { ...(file !== undefined && { file }), altText: alt })"
-        class="fixed inset-0 flex min-h-full items-center justify-center"
+        class="fixed inset-0 flex min-h-full items-center justify-center text-xs md:text-sm"
       >
         <TransitionChild
           as="template"
@@ -50,10 +50,8 @@ watch(
           leave-to="opacity-0 scale-95"
         >
           <DialogPanel class="w-full max-w-md bg-background p-3 rounded-xl">
-            <div class="flex flex-col justify-center gap-2 text-sm">
-              <label for="featured-image" class="font-semibold text-base"
-                >Edit featured image</label
-              >
+            <div class="flex flex-col justify-center gap-2">
+              <label for="featured-image" class="font-semibold">Edit featured image</label>
 
               <ImageInput v-model:file="file" :alt="alt" input-id="featured-image" />
 

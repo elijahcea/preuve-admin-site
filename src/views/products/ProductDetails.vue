@@ -548,7 +548,7 @@ const uploadImage = async (token: string, file: File) => {
       >
         <ArrowLeftIcon class="size-5" />
       </RouterLink>
-      <h1 class="font-bold text-xl truncate">{{ title }}</h1>
+      <h1 class="font-bold text-lg md:text-xl truncate">{{ title }}</h1>
       <StatusLabel :status="productStatus" />
     </div>
 

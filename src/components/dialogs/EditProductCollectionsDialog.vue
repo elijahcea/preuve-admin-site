@@ -52,7 +52,7 @@ watch(
       </TransitionChild>
       <form
         @submit.prevent="emit('saveEdit', { collectionIds: activeCollections.map((c) => c.id) })"
-        class="fixed inset-0 flex min-h-full items-center justify-center"
+        class="fixed inset-0 flex min-h-full items-center justify-center text-xs md:text-sm"
       >
         <TransitionChild
           as="template"
@@ -67,7 +67,7 @@ watch(
             <DialogTitle class="font-semibold mb-3">Edit collections</DialogTitle>
 
             <Listbox as="div" v-model="activeCollections" multiple>
-              <div class="p-3 text-sm">
+              <div class="p-3">
                 <ListboxLabel>Collections</ListboxLabel>
                 <ListboxButton
                   class="relative border border-gray-300 rounded p-2 w-full flex items-center justify-between my-1"

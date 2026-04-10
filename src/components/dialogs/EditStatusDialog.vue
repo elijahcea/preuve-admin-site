@@ -47,7 +47,7 @@ watch(
       </TransitionChild>
       <form
         @submit.prevent="emit('saveEdit', { status: productStatus })"
-        class="fixed inset-0 flex min-h-full items-center justify-center"
+        class="fixed inset-0 flex min-h-full items-center justify-center text-xs md:text-sm"
       >
         <TransitionChild
           as="template"
@@ -62,7 +62,7 @@ watch(
             <DialogTitle class="font-semibold mb-3">Edit status</DialogTitle>
 
             <Listbox as="div" v-model="productStatus" name="product-status">
-              <div class="p-3 text-sm">
+              <div class="p-3">
                 <ListboxLabel>Status</ListboxLabel>
 
                 <ListboxButton

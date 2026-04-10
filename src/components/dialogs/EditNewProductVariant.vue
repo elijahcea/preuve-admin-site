@@ -55,7 +55,7 @@ watch(
       </TransitionChild>
       <form
         @submit.prevent="emit('save', { id, ...variantInfo })"
-        class="fixed inset-0 flex min-h-full items-center justify-center"
+        class="fixed inset-0 flex min-h-full items-center justify-center text-xs md:text-sm"
       >
         <TransitionChild
           as="template"
@@ -69,7 +69,7 @@ watch(
           <DialogPanel class="w-full max-w-md bg-background p-3 rounded-xl flex flex-col gap-2">
             <DialogTitle class="font-semibold mb-3">Edit variant</DialogTitle>
 
-            <div class="flex justify-center gap-2 text-sm">
+            <div class="flex justify-center gap-2">
               <div class="w-full">
                 <label for="variant-sku">SKU (Stock Keeping Unit)</label>
                 <input
@@ -95,7 +95,7 @@ watch(
               </div>
             </div>
 
-            <div class="text-sm">
+            <div>
               <label class="my-1" for="variant-price">Price</label>
               <PriceInput
                 input-id="variant-price"
