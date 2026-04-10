@@ -20,9 +20,11 @@ import {
   deleteOption,
   deleteProduct,
   deleteVariant,
+  generateCloudinarySignature,
   updateOption,
   updateProduct,
   updateVariant,
+  uploadImageToCloudinary,
 } from '@/api/mutations'
 import { ElTag } from 'element-plus'
 import { createColumnHelper, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
@@ -40,10 +42,19 @@ import EditProductCollectionsDialog from '@/components/dialogs/EditProductCollec
 import CreateOptionDialog from '@/components/dialogs/CreateOptionDialog.vue'
 import CreateVariantDialog from '@/components/dialogs/CreateVariantDialog.vue'
 import router from '@/router'
+import EditImageDialog from '@/components/dialogs/EditImageDialog.vue'
 
 type ProductUpdatePayload = {
   action: 'update:product'
   data: ProductUpdateDTO
+}
+
+type ImageUpdatePayload = {
+  action: 'update:image'
+  data: {
+    file?: File
+    altText: string | null
+  }
 }
 
 type OptionUpdatePayload = {
@@ -66,7 +77,7 @@ type VariantCreatePayload = {
   data: ProductVariantCreateDTO
 }
 
-type DeleteAction = 'delete:product' | 'delete:option' | 'delete:variant'
+type DeleteAction = 'delete:product' | 'delete:option' | 'delete:variant' | 'delete:image'
 
 const props = defineProps<{
   id: string
@@ -82,6 +93,7 @@ const isEditStatusOpen = ref(false)
 const isEditCollectionsOpen = ref(false)
 const isEditOptionOpen = ref(false)
 const isEditVariantOpen = ref(false)
+const isEditImageOpen = ref(false)
 const isCreateOptionOpen = ref(false)
 const isCreateVariantOpen = ref(false)
 
@@ -299,6 +311,7 @@ const openConfirmPopover = (action: DeleteAction, id: string, message: string) =
 const handleSubmit = async (
   payload:
     | ProductUpdatePayload
+    | ImageUpdatePayload
     | OptionUpdatePayload
     | VariantUpdatePayload
     | OptionCreatePayload
@@ -314,6 +327,27 @@ const handleSubmit = async (
       switch (payload.action) {
         case 'update:product': {
           await updateProductMutation.mutateAsync({ token, product: payload.data })
+          isEditProductOpen.value = false
+          isEditCollectionsOpen.value = false
+          isEditStatusOpen.value = false
+          break
+        }
+        case 'update:image': {
+          let featuredImageUrl = null
+          if (payload.data.file) {
+            featuredImageUrl = await uploadImage(token, payload.data.file)
+          }
+
+          await updateProductMutation.mutateAsync({
+            token,
+            product: {
+              featuredImage: {
+                ...(featuredImageUrl && { url: featuredImageUrl }),
+                altText: payload.data.altText,
+              },
+            },
+          })
+          isEditImageOpen.value = false
           break
         }
         case 'update:option': {
@@ -322,6 +356,7 @@ const handleSubmit = async (
             optionId: payload.data.optionId,
             option: { name: payload.data.name, values: payload.data.values },
           })
+          isEditOptionOpen.value = false
           break
         }
         case 'update:variant': {
@@ -335,6 +370,7 @@ const handleSubmit = async (
               selectedValues: payload.data.selectedValues,
             },
           })
+          isEditVariantOpen.value = false
           break
         }
         case 'create:option': {
@@ -342,6 +378,7 @@ const handleSubmit = async (
             token,
             option: payload.data,
           })
+          isCreateOptionOpen.value = false
           break
         }
         case 'create:variant': {
@@ -349,6 +386,7 @@ const handleSubmit = async (
             token,
             variant: payload.data,
           })
+          isCreateVariantOpen.value = false
           break
         }
         default:
@@ -402,6 +440,18 @@ const handleDelete = async (action: DeleteAction, id: string) => {
           await deleteProductMutation.mutateAsync({ token, productId: id })
           return
         }
+        case 'delete:image': {
+          await updateProductMutation.mutateAsync({
+            token,
+            product: {
+              featuredImage: {
+                url: null,
+                altText: null,
+              },
+            },
+          })
+          break
+        }
         case 'delete:option': {
           await deleteOptionMutation.mutateAsync({ token, optionId: id })
           break
@@ -446,6 +496,35 @@ const handleDelete = async (action: DeleteAction, id: string) => {
         }
       })
       .catch((reason) => console.log(reason))
+  }
+}
+
+const uploadImage = async (token: string, file: File) => {
+  try {
+    const signatureResult = await generateCloudinarySignature(token, {
+      file_size: file.size,
+      content_type: file.type,
+    })
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('api_key', signatureResult.apiKey)
+    formData.append('timestamp', `${signatureResult.timestamp}`)
+    formData.append('signature', signatureResult.signature)
+    formData.append('folder', signatureResult.folder)
+
+    const uploadResult = await uploadImageToCloudinary(formData)
+
+    return uploadResult.secure_url
+  } catch (e) {
+    console.log('File upload failed', e)
+    ElNotification({
+      title: `Error uploading image: ${title.value}`,
+      message: `${e}`,
+      type: 'error',
+      position: 'bottom-right',
+    })
+    return null
   }
 }
 </script>
@@ -538,6 +617,43 @@ const handleDelete = async (action: DeleteAction, id: string) => {
             @cancel-edit="isEditCollectionsOpen = false"
           />
         </div>
+      </section>
+
+      <section class="bg-light rounded-xl shadow-lg divide-y divide-gray-200 min-w-0">
+        <div class="p-3 mb-1 flex justify-between items-center">
+          <h2 class="font-semibold">Featured Image</h2>
+          <ItemActions
+            :item-id="productQuery.data.value.product.id"
+            :allow-edit="true"
+            :allow-delete="true"
+            @edit-item="isEditImageOpen = true"
+            @delete-item="
+              () =>
+                openConfirmPopover(
+                  'delete:image',
+                  props.id,
+                  'This action will permanently delete the featured image. Continue?',
+                )
+            "
+          />
+        </div>
+
+        <div
+          v-if="productQuery.data.value.product.featuredImage?.url"
+          class="h-30 flex mt-2 p-3 justify-center"
+        >
+          <img
+            :src="productQuery.data.value.product.featuredImage?.url"
+            :alt="productQuery.data.value.product.featuredImage.altText ?? ''"
+          />
+        </div>
+
+        <EditImageDialog
+          :is-open="isEditImageOpen"
+          :alt-text="productQuery.data.value.product.featuredImage?.altText ?? null"
+          @save-edit="(payload) => handleSubmit({ action: 'update:image', data: payload })"
+          @cancel-edit="isEditImageOpen = false"
+        />
       </section>
     </div>
 
