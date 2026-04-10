@@ -16,7 +16,9 @@ const handleLogout = () => {
 
 <template>
   <Menu as="div" class="relative" v-slot="{ close }" v-loading="isLoading">
-    <MenuButton class="bg-fill rounded-md py-1 px-2 outline outline-black hover:bg-fill/50 text-sm">
+    <MenuButton
+      class="bg-fill rounded-md py-1 px-2 outline outline-black hover:bg-fill/50 text-sm md:text-base"
+    >
       <p>{{ user?.name || user?.nickname }}</p>
     </MenuButton>
     <transition
