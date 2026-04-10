@@ -171,8 +171,9 @@ const revalidateProducts = async () => {
 const handleSubmit = async () => {
   if (isAuthenticated.value) {
     try {
-      let featuredImageUrl = null
       isLoading.value = true
+
+      let featuredImageUrl = null
 
       const token = await getAccessTokenSilently()
 
@@ -364,7 +365,7 @@ const uploadImage = async (token: string, file: File) => {
         <Listbox v-model="productStatus" name="product-status">
           <ListboxLabel class="font-semibold">Product status</ListboxLabel>
           <ListboxButton
-            class="relative border border-gray-300 rounded p-1 w-full flex items-center justify-between my-2"
+            class="relative border border-gray-300 rounded p-1 w-full flex items-center justify-between my-1"
           >
             <p>{{ productStatus ? 'Active' : 'Draft' }}</p>
             <span>
@@ -468,6 +469,25 @@ const uploadImage = async (token: string, file: File) => {
           </div>
         </Listbox>
       </section>
+
+      <section class="bg-light rounded-xl shadow p-3">
+        <label for="featured-image" class="font-semibold">Featured Image</label>
+
+        <ImageInput v-model:file="file" :alt="imageAlt" input-id="featured-image" />
+
+        <div v-if="file" class="pt-4">
+          <label for="alt">Image Alt</label>
+          <p class="text-xs">
+            Optionally provide a brief description of the image for improved accessibility
+          </p>
+          <input
+            id="alt"
+            type="text"
+            class="border border-gray-300 rounded p-1 w-full mt-1"
+            v-model="imageAlt"
+          />
+        </div>
+      </section>
     </div>
 
     <div class="flex flex-col items-center gap-5 md:col-span-2 md:row-start-2">
@@ -481,28 +501,6 @@ const uploadImage = async (token: string, file: File) => {
       >
         <!-- Title and Description -->
         <TitleAndDescription v-model:title="title" v-model:description="description" />
-
-        <section class="bg-light rounded-xl shadow p-3">
-          <h2 class="font-semibold mb-4">Media</h2>
-
-          <div class="flex flex-col gap-1">
-            <label for="featured-image">Featured Image</label>
-            <ImageInput :model-value="file" />
-          </div>
-
-          <div v-if="file">
-            <label for="alt"
-              >Alt (Optionally provide a brief description of the image for improved
-              accessibility)</label
-            >
-            <input
-              id="alt"
-              type="text"
-              class="border border-gray-300 rounded p-1 w-full mt-1"
-              v-model="imageAlt"
-            />
-          </div>
-        </section>
 
         <Transition name="fade">
           <section v-if="!options.length" class="bg-light rounded-xl shadow p-3">
