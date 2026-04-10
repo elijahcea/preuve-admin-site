@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { Float } from '@headlessui-float/vue'
 import { EllipsisHorizontalIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
 const { allowEdit, allowDelete, itemId } = defineProps<{
@@ -12,10 +13,11 @@ const emit = defineEmits(['editItem', 'deleteItem'])
 
 <template>
   <Menu as="div" class="relative" v-slot="{ close }">
-    <MenuButton class="rounded-md py-1 px-2 hover:bg-cool-gray">
-      <EllipsisHorizontalIcon class="size-5" />
-    </MenuButton>
-    <transition
+    <Float
+      auto-placement
+      :offset="4"
+      strategy="fixed"
+      :z-index="5"
       enter-active-class="transition duration-100 ease-out"
       enter-from-class="transform scale-95 opacity-0"
       enter-to-class="transform scale-100 opacity-100"
@@ -23,8 +25,12 @@ const emit = defineEmits(['editItem', 'deleteItem'])
       leave-from-class="transform scale-100 opacity-100"
       leave-to-class="transform scale-95 opacity-0"
     >
+      <MenuButton class="rounded-md py-1 px-2 hover:bg-cool-gray">
+        <EllipsisHorizontalIcon class="size-5" />
+      </MenuButton>
+
       <MenuItems
-        class="absolute right-0 w-min-content rounded-md bg-white outline outline-gray-100 shadow-lg divide-y divide-gray-100 z-10"
+        class="w-min-content rounded-md bg-white outline outline-gray-100 shadow-lg divide-y divide-gray-100 z-10"
       >
         <MenuItem v-if="allowEdit" as="div" class="p-1" v-slot="{ active }">
           <button
@@ -63,6 +69,6 @@ const emit = defineEmits(['editItem', 'deleteItem'])
           </button>
         </MenuItem>
       </MenuItems>
-    </transition>
+    </Float>
   </Menu>
 </template>

@@ -20,7 +20,7 @@ const isOpen = ref(false)
 
 <template>
   <header
-    class="bg-foreground text-background min-h-15 grid grid-cols-[1fr_2fr_1fr] md:grid-cols-2 items-center px-4 gap-1"
+    class="relative z-20 bg-foreground text-background min-h-15 grid grid-cols-[1fr_2fr_1fr] md:grid-cols-2 items-center px-4 gap-1"
   >
     <nav class="md:hidden">
       <button
