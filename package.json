@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.5.0",
+    "@headlessui-float/vue": "^0.15.1",
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
     "@tabler/icons-vue": "^3.41.1",

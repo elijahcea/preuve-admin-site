@@ -11,6 +11,9 @@ importers:
       '@auth0/auth0-vue':
         specifier: ^2.5.0
         version: 2.5.0(typescript@5.9.3)(vue-router@4.6.4(vue@3.5.26(typescript@5.9.3)))
+      '@headlessui-float/vue':
+        specifier: ^0.15.1
+        version: 0.15.1(@headlessui/vue@1.7.23(vue@3.5.26(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))
       '@headlessui/vue':
         specifier: ^1.7.23
         version: 1.7.23(vue@3.5.26(typescript@5.9.3))
@@ -476,6 +479,15 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@floating-ui/vue@1.1.11':
+    resolution: {integrity: sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw==}
+
+  '@headlessui-float/vue@0.15.1':
+    resolution: {integrity: sha512-Hq36YAnwLFzOs3nk5YNSiCjh6MA+UO+xzUYStqrrKAYSjUaEZe120v8P3YOIabC6ipIw9LfQqLQt1tbkV7Dr/Q==}
+    peerDependencies:
+      '@headlessui/vue': ^1.0.0
+      vue: ^3.0.0
 
   '@headlessui/vue@1.7.23':
     resolution: {integrity: sha512-JzdCNqurrtuu0YW6QaDtR2PIYCKPUWq28csDyMvN4zmGccmE7lz40Is6hc3LA4HFeCI7sekZ/PQMTNmn9I/4Wg==}
@@ -2609,6 +2621,25 @@ snapshots:
       '@floating-ui/utils': 0.2.11
 
   '@floating-ui/utils@0.2.11': {}
+
+  '@floating-ui/vue@1.1.11(vue@3.5.26(typescript@5.9.3))':
+    dependencies:
+      '@floating-ui/dom': 1.7.6
+      '@floating-ui/utils': 0.2.11
+      vue-demi: 0.14.10(vue@3.5.26(typescript@5.9.3))
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - vue
+
+  '@headlessui-float/vue@0.15.1(@headlessui/vue@1.7.23(vue@3.5.26(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))':
+    dependencies:
+      '@floating-ui/core': 1.7.5
+      '@floating-ui/dom': 1.7.6
+      '@floating-ui/vue': 1.1.11(vue@3.5.26(typescript@5.9.3))
+      '@headlessui/vue': 1.7.23(vue@3.5.26(typescript@5.9.3))
+      vue: 3.5.26(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
 
   '@headlessui/vue@1.7.23(vue@3.5.26(typescript@5.9.3))':
     dependencies:
