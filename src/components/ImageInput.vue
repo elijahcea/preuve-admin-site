@@ -41,7 +41,7 @@ const handleFileChange = (e: Event) => {
       type="file"
       :id="inputId"
       :name="inputId"
-      accept="image/jpeg, image/png, .jpg, .jpeg, .png, .webp"
+      accept="image/jpeg, image/png, image/avif, image/webp, .jpg, .jpeg, .png, .webp, .avif"
       class="text-grey-500 file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:cursor-pointer hover:file:bg-blue-100/50 cursor-pointer"
       @change.prevent="handleFileChange"
     />
