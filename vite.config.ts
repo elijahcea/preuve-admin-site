@@ -35,14 +35,14 @@ export default defineConfig({
       output: {
         manualChunks: {
           'group-products': [
-            './src/views/products/ProductsView.vue',
-            './src/views/products/NewProductView.vue',
-            './src/views/products/ProductDetailsView.vue',
+            './src/views/products/ProductsList.vue',
+            './src/views/products/NewProduct.vue',
+            './src/views/products/ProductDetails.vue',
           ],
           'group-collections': [
-            './src/views/collections/CollectionsView.vue',
-            './src/views/collections/NewCollectionView.vue',
-            './src/views/collections/CollectionDetailsView.vue',
+            './src/views/collections/CollectionsList.vue',
+            './src/views/collections/NewCollection.vue',
+            './src/views/collections/CollectionDetails.vue',
           ],
         },
       },
