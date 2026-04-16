@@ -18,6 +18,7 @@ import { deleteCollection } from '@/api/mutations'
 import { ElMessageBox, ElNotification } from 'element-plus'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { RouterLink } from 'vue-router'
+import TableSkeleton from '@/components/skeletons/TableSkeleton.vue'
 
 const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
@@ -199,7 +200,7 @@ const handleDeleteCollections = async () => {
   <div class="flex flex-col align-start gap-3">
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Collections</h1>
-      <div class="flex gap-3">
+      <div class="flex flex-col md:flex-row gap-3">
         <Menu as="div" class="relative">
           <MenuButton class="bg-light outline outline-gray-200 font-medium rounded-md py-1 px-2">
             <span>More actions</span>
@@ -266,7 +267,7 @@ const handleDeleteCollections = async () => {
         </button>
       </div>
     </div>
-    <div v-if="isPending">Loading...</div>
+    <TableSkeleton v-if="isPending" />
     <div v-else-if="isError">Something went wrong: {{ error }}</div>
     <div v-else-if="queryData" class="bg-light outline outline-gray-200 rounded-xl shadow">
       <div>
