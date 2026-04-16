@@ -43,6 +43,8 @@ import CreateOptionDialog from '@/components/dialogs/CreateOptionDialog.vue'
 import CreateVariantDialog from '@/components/dialogs/CreateVariantDialog.vue'
 import router from '@/router'
 import EditImageDialog from '@/components/dialogs/EditImageDialog.vue'
+import DetailsSkeleton from '@/components/skeletons/DetailsSkeleton.vue'
+import ItemSkeleton from '@/components/skeletons/ItemSkeleton.vue'
 
 type ProductUpdatePayload = {
   action: 'update:product'
@@ -530,7 +532,7 @@ const uploadImage = async (token: string, file: File) => {
 </script>
 
 <template>
-  <div v-if="productQuery.isPending.value">Loading...</div>
+  <DetailsSkeleton v-if="productQuery.isPending.value" />
   <div v-else-if="productQuery.isError.value">
     An error has occured: {{ productQuery.error.value }}
   </div>
@@ -577,7 +579,7 @@ const uploadImage = async (token: string, file: File) => {
       </section>
 
       <!-- Product organization -->
-      <div v-if="collectionsQuery.isPending.value">Loading...</div>
+      <ItemSkeleton v-if="collectionsQuery.isPending.value" />
       <div v-else-if="collectionsQuery.isError.value">
         An error has occured fetching collections: {{ collectionsQuery.error.value }}
       </div>

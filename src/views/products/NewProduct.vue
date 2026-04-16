@@ -40,6 +40,7 @@ import { ElNotification, ElTag, ElMessageBox } from 'element-plus'
 import { useAuth0 } from '@auth0/auth0-vue'
 import EditNewProductVariant from '@/components/dialogs/EditNewProductVariant.vue'
 import ImageInput from '@/components/ImageInput.vue'
+import ItemSkeleton from '@/components/skeletons/ItemSkeleton.vue'
 
 const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
@@ -410,7 +411,7 @@ const uploadImage = async (token: string, file: File) => {
       <!-- Product organization/collections -->
       <section class="bg-light rounded-xl shadow-lg p-3 min-w-0 md:col-start-3">
         <h2 class="font-semibold mb-4">Product organization</h2>
-        <div v-if="collectionsQuery.isPending.value">Loading...</div>
+        <ItemSkeleton v-if="collectionsQuery.isPending.value" />
         <div v-else-if="collectionsQuery.isError.value">
           An error has occured: {{ collectionsQuery.error.value }}
         </div>

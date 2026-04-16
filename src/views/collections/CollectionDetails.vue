@@ -16,6 +16,8 @@ import { ElTag } from 'element-plus'
 import { updateCollection } from '@/api/mutations'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { ElNotification, ElMessageBox } from 'element-plus'
+import DetailsSkeleton from '@/components/skeletons/DetailsSkeleton.vue'
+import ItemSkeleton from '@/components/skeletons/ItemSkeleton.vue'
 
 const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0()
 
@@ -135,7 +137,7 @@ watch(
 </script>
 
 <template>
-  <div v-if="collectionQuery.isPending.value">Loading...</div>
+  <DetailsSkeleton v-if="collectionQuery.isPending.value" />
   <div v-else-if="collectionQuery.isError.value">
     Something went wrong: {{ collectionQuery.error }}
   </div>
@@ -158,7 +160,7 @@ watch(
       <TitleAndDescription v-model:title="title" v-model:description="description" />
 
       <section class="bg-light rounded-xl shadow-lg p-3 min-w-0">
-        <div v-if="productsQuery.isPending.value">Loading...</div>
+        <ItemSkeleton v-if="productsQuery.isPending.value" />
         <div v-else-if="productsQuery.isError.value">
           Something went wrong: {{ productsQuery.error.value }}
         </div>
